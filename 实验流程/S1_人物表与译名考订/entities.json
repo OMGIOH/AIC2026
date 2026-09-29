@@ -5,7 +5,7 @@
  "generated": "2026-09-29",
  "source_doc": "buyi_epic_12204413",
  "canon_version": "v1.0-ocr",
- "note": "白名单实体表（S1 产出）；canonical 格式为同目录 entities.jsonl（逐行）。counts: 39 实体 = 人物层 20 + 地点 7 + 器物 7 + 作品 1 + 传承者 2 + 流传地 1 + 仪式 1",
+ "note": "白名单实体表（S1 产出，QC 修复后 v2）；canonical 格式为同目录 entities.jsonl",
  "entities": [
   {
    "id": "person_anwang",
@@ -67,19 +67,25 @@
      "doc_id": "buyi_epic_12204413",
      "page": 910,
      "line_no": 4,
-     "note": "鱼女所生"
+     "note": "于是生下了安王。"
     },
     {
      "doc_id": "buyi_epic_12204413",
      "page": 977,
-     "line_no": 5,
-     "note": "同安王的母亲是鱼，见子遇难她来救"
+     "line_no": 6,
+     "note": "同安王的母亲是鱼，"
     },
     {
      "doc_id": "buyi_epic_12204413",
      "page": 977,
      "line_no": 7,
-     "note": "一声炸雷响"
+     "note": "见子遇难她来救。"
+    },
+    {
+     "doc_id": "buyi_epic_12204413",
+     "page": 977,
+     "line_no": 8,
+     "note": "一声炸雷响，"
     },
     {
      "doc_id": "buyi_epic_12204413",
@@ -235,7 +241,13 @@
      "doc_id": "buyi_epic_12204413",
      "page": 906,
      "line_no": 2,
-     "note": "夜间化人吹笛弹弦而来"
+     "note": "鱼吹笛子来匆匆，"
+    },
+    {
+     "doc_id": "buyi_epic_12204413",
+     "page": 906,
+     "line_no": 3,
+     "note": "鱼弹口弦悄悄到。"
     },
     {
      "doc_id": "buyi_epic_12204413",
@@ -247,13 +259,13 @@
      "doc_id": "buyi_epic_12204413",
      "page": 913,
      "line_no": 6,
-     "note": "消失无踪影（遁水）"
+     "note": "消失无踪影。"
     },
     {
      "doc_id": "buyi_epic_12204413",
      "page": 977,
-     "line_no": 6,
-     "note": "见子遇难她来救"
+     "line_no": 7,
+     "note": "见子遇难她来救。"
     },
     {
      "doc_id": "buyi_epic_12204413",
@@ -276,10 +288,11 @@
    "first_seen": {
     "doc_id": "buyi_epic_12204413",
     "page": 959,
-    "line_no": 5,
-    "layer": "zhi+yi",
+    "line_no": 6,
+    "layer": "yi",
     "canon_version": "v1.0-ocr",
-    "text": "直译「逃　去　头河　人　玄王」｜意译「我逃到玄王住的河头上，」"
+    "text": "逃到玄王住的河头上，",
+    "note_zhi": "直译「逃　去　头河　人　玄王」（p959 L5）"
    },
    "ref_forms": [
     {
@@ -357,7 +370,7 @@
    "first_seen": {
     "doc_id": "buyi_epic_12204413",
     "page": 915,
-    "line_no": 6,
+    "line_no": 8,
     "layer": "yi",
     "canon_version": "v1.0-ocr",
     "text": "巧遇两个生意人，"
@@ -399,7 +412,7 @@
    "first_seen": {
     "doc_id": "buyi_epic_12204413",
     "page": 915,
-    "line_no": 6,
+    "line_no": 8,
     "layer": "yi",
     "canon_version": "v1.0-ocr",
     "text": "巧遇两个生意人，（二人同现）"
@@ -447,7 +460,7 @@
     },
     {
      "form": "外祖父和外祖母",
-     "range": "p912 L5",
+     "range": "p912 L6",
      "note": "鱼女言明身份"
     },
     {
@@ -497,7 +510,7 @@
    "first_seen": {
     "doc_id": "buyi_epic_12204413",
     "page": 965,
-    "line_no": 2,
+    "line_no": 4,
     "layer": "yi",
     "canon_version": "v1.0-ocr",
     "text": "祖王给鹰穿花衣，"
@@ -510,7 +523,7 @@
     },
     {
      "form": "鹰小姐",
-     "range": "p965 L3",
+     "range": "p965 L5",
      "note": "拟人敬称"
     }
    ],
@@ -529,7 +542,7 @@
    "first_seen": {
     "doc_id": "buyi_epic_12204413",
     "page": 965,
-    "line_no": 1,
+    "line_no": 3,
     "layer": "yi",
     "canon_version": "v1.0-ocr",
     "text": "祖王给乌鸦穿黑衣，"
@@ -542,7 +555,7 @@
     },
     {
      "form": "乌鸦小姐",
-     "range": "p965 L4",
+     "range": "p965 L6",
      "note": "拟人敬称"
     }
    ],
@@ -560,7 +573,7 @@
    "first_seen": {
     "doc_id": "buyi_epic_12204413",
     "page": 975,
-    "line_no": 4,
+    "line_no": 5,
     "layer": "yi",
     "canon_version": "v1.0-ocr",
     "text": "叫老虎掘洞，"
@@ -591,7 +604,7 @@
    "first_seen": {
     "doc_id": "buyi_epic_12204413",
     "page": 975,
-    "line_no": 5,
+    "line_no": 6,
     "layer": "yi",
     "canon_version": "v1.0-ocr",
     "text": "叫老熊运土，"
@@ -672,7 +685,7 @@
    "first_seen": {
     "doc_id": "buyi_epic_12204413",
     "page": 975,
-    "line_no": 2,
+    "line_no": 3,
     "layer": "yi",
     "canon_version": "v1.0-ocr",
     "text": "叫全寨人都去，"
@@ -740,7 +753,12 @@
     "line_no": 38,
     "layer": "full",
     "canon_version": "v1.1-ocr",
-    "text": "安王在洞里向龙王外公外婆呼救，得以脱险。"
+    "text": "安王在洞里向龙王外公外婆呼救，得以脱险。",
+    "line_span": [
+     38,
+     39
+    ],
+    "note": "引文跨行（大观 p121 L38-39）"
    },
    "external": [
     "云村寨《论王》：「向龙王、雷公呼救」",
@@ -756,14 +774,11 @@
    "name": "雷公",
    "type": "Deity",
    "kind": "神灵",
-   "source": "版本复述层（非古歌本事实层）",
+   "source": "外部版本（仅外部，语料内 0 命中）",
    "first_seen": {
-    "doc_id": "buyi_daguan",
-    "page": 121,
-    "line_no": 38,
-    "layer": "full",
-    "canon_version": "v1.1-ocr",
-    "text": "（复述段只言龙王；雷公见于外部版本——见 external）"
+    "external": true,
+    "source": "云村寨《论王》存档：「坠井得龙王、雷公救助」；望谟长版梗概同",
+    "archive": "实验流程/S0_切片与版本语料集/awzw/versions/yuncunzhai/论王_从神圣到凡俗.md"
    },
    "external": [
     "云村寨《论王》：坠井得龙王、雷公救助",
@@ -771,7 +786,8 @@
    ],
    "notes": [
     "古歌本 p977 L7「一声炸雷响」为天象描写，非人格神——已区分，不误建边",
-    "字面（雷）与人格神（雷公）的区别登记在案"
+    "字面（雷）与人格神（雷公）的区别登记在案",
+    "first_seen 为外部指针（非语料指针）——雷公不见于大观复述段（p121-122 仅言龙王），也不见于古歌本；语料内「一声炸雷响」（p977 L8）为天象描写，已区分"
    ]
   },
   {
@@ -1054,7 +1070,7 @@
    "first_seen": {
     "doc_id": "buyi_epic_12204413",
     "page": 952,
-    "line_no": 5,
+    "line_no": 6,
     "layer": "yi",
     "canon_version": "v1.0-ocr",
     "text": "把你的稻谷啄光，"
@@ -1110,7 +1126,7 @@
    "first_seen": {
     "doc_id": "buyi_epic_12204413",
     "page": 956,
-    "line_no": 2,
+    "line_no": 3,
     "layer": "yi",
     "canon_version": "v1.0-ocr",
     "text": "有一百五十把苦竹火炬，"
@@ -1260,7 +1276,7 @@
     "line_no": 8,
     "layer": "full",
     "canon_version": "v1.0-ocr",
-    "text": "流传地区：罗甸、望谟、册亨一带（OCR「册享」已按人工复核订正）"
+    "text": "流传地区：罗甸、望谟、册享一带（原文如此；「册享」按人工复核订正为「册亨」）"
    },
    "external_expansion": [
     "望谟、罗甸、贞丰、册亨、安龙、兴仁、关岭、镇宁（云村寨《论王》——背景属性）"
@@ -1281,7 +1297,8 @@
     "line_no": 2,
     "layer": "full",
     "canon_version": "v1.0-ocr",
-    "text": "《安王和祖王》…只限于在三种特定场合下才能演唱：一是家中发生非正常死亡时…"
+    "text": "《安王和祖王》大多数是由宗教祭司布摩唱述，它有别于其他",
+    "note": "三种演唱场合详见 p904 L2-9（in_corpus_evidence）"
    },
    "in_corpus_evidence": [
     {
