@@ -50,14 +50,26 @@ BEATS = [
     (14, "老人公证分河分地；安王不受，令年年纳贡",             982, 985),
 ]
 
-# 篇尾元数据：2026-09-29 人工从 full 层 p985 读出（乱码行之下，qa 文件可复核）
+# 篇尾元数据：2026-09-29 人工复核完成，结论见 qa/tail_boundary_confirmed.md
 TAIL_METADATA = {
-    "流传地区": "罗甸、望谟、册享一带",
+    "流传地区": "罗甸、望谟、册亨一带",
+    "流传地区_note": "p985 L8 原文 OCR 作「册享」，按人工复核结论订正为「册亨」（贵州册亨县）",
     "唱述人": "望谟县城关镇上院廖家园",
+    "唱述人_note": "p985 L9；复核剔除行首残片「悲所平下　」，值不变",
     "搜集整理": "黄义仁",
     "搜集时间": "1962年4月",
     "source_page": 985,
-    "status": "已从 full 层 p985 读出，待人工复核 qa/tail_p983-989.txt",
+    "status": "已人工复核（2026-09-29），见 qa/tail_boundary_confirmed.md",
+}
+
+# 人工复核登记（qa/tail_boundary_confirmed.md 第三节）：后续切片一律剔除
+TAIL_REVIEW = {
+    "date": "2026-09-29",
+    "file": "qa/tail_boundary_confirmed.md",
+    "exclusion_lines": ["p983 L5", "p985 L4-L7（乱码块 A）", "p986 L15 行尾残尾", "p988 L6", "p988 L8-L19（乱码块 B）"],
+    "keep_exceptions": ["p988 L7（后记落款 1997年5月20日，夹于乱码块 B 内，保留）"],
+    "doc_max_page": 988,
+    "note": "full 层最大页 988，不存在 p989；乱码块 A/B 不可恢复；自动「??疑似乱码」标记已由人工判定取代",
 }
 
 # 大观命中核验基准（设计方案 §1.1 所记）
@@ -269,6 +281,7 @@ def main():
         "pages": {"yi_verses": list(YI_RANGE), "full_lines": list(FULL_RANGE), "tail_qa": list(TAIL_QA_RANGE)},
         "beats": beat_stats,
         "tail_metadata": TAIL_METADATA,
+        "tail_review": TAIL_REVIEW,
         "tail_garbled_flagged": flagged,
         "counts": {"yi_verses": len(yi_records), "full_lines": len(full_records),
                    "daguan_mubodong_lines": len(daguan_recs), "daguan_hit_pages": hit_pages},
@@ -352,12 +365,12 @@ def write_report(checks, beat_stats, covered_beats, zero_pages, no_beat_pages, o
     L.append(f"3. 指针回放失败 {len(bad)} 条（cross_split 类 ±1 字误差属已知待人工项，见 flags 文档）。")
     diff_str = "；".join(f"{k}：实际 {v['actual']} vs 方案 {v['expected']}（Δ{v['delta']:+d}）" for k, v in diff.items())
     L.append(f"4. 大观命中总量与方案所记差异——{diff_str}。")
-    L.append(f"5. 篇尾元数据已从 full 层 p985 读出并写入 piece_meta.json（{TAIL_METADATA['status']}）；"
-             f"疑似乱码自动标记 {len(flagged)} 行，见 qa/tail_p983-989.txt。")
+    L.append(f"5. 篇尾元数据已人工复核（{TAIL_REVIEW['date']}，见 {TAIL_REVIEW['file']}）：四项元数据成立，"
+             f"「册享」订正为「册亨」；乱码块 A/B 与两处孤立碎片列入排除清单（piece_meta.tail_review）。")
     L.append("")
     L.append("## 六、人工核对入口")
     L.append("")
-    L.append("- `qa/tail_p983-989.txt`：篇尾乱码区逐行（预计 10 分钟）——确认四项元数据与乱码行边界。")
+    L.append("- `qa/tail_p983-989.txt`：篇尾乱码区逐行——**已完成人工复核（2026-09-29，结论见 qa/tail_boundary_confirmed.md）**。")
     L.append("- 本报告第三节失败表（如有）：cross_split ±1 字项逐条回看。")
     L.append("- `versions/daguan_hit_pages.csv`：高频页抽查（如 p121-122、p148、p332-353）。")
     L.append("")
