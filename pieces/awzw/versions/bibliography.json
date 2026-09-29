@@ -1,0 +1,132 @@
+{
+  "piece": "安王与祖王",
+  "piece_id": "awzw",
+  "generated": "2026-09-29",
+  "policy": "外部资料只登记书目信息与版本链，不获取全文、不作为事实证据指针（设计方案 §4.2 纪律）；获取全文另立任务（实体书/馆际），不阻塞主线。",
+  "entries": [
+    {
+      "id": "wangmo-1994",
+      "short": "望谟1994整理本",
+      "title": "安王与祖王",
+      "editor_org": "望谟县民族事务委员会编",
+      "recorded_by": "黄荣昌、黄仕才记录整理",
+      "revised_by": "王伟校订，周国炎加工统编",
+      "publisher": "贵州民族出版社",
+      "year": 1994,
+      "extent": "1700余行（最长整理本）",
+      "role_in_version_chain": "version_of 目标；篇幅与情节完整度对照基准",
+      "acquisition": "未获取全文；只登记（实体书/馆际另立任务）",
+      "source_of_bibliographic_data": "云村寨《摩经》篇存档（versions/yuncunzhai/摩经_布依族历史文化的重要载体.md）；设计方案 §1.4"
+    },
+    {
+      "id": "holm-hanvueng",
+      "short": "Holm英译本",
+      "title": "Hanvueng: The Goose King and the Ancestral King: A Zhuang Verse Text from Guangxi",
+      "translator_annotator": "David Holm（译注，含原抄本对照）",
+      "series": "Zhuang Traditional Texts Series 第1卷",
+      "publisher": "Brill",
+      "year": null,
+      "extent": null,
+      "role_in_version_chain": "version_of 目标；国际平行体诗学互证",
+      "acquisition": "未获取全文；只登记",
+      "source_of_bibliographic_data": "设计方案 §1.4（Brill《Zhuang Traditional Texts Series》）",
+      "note": "Holm 本文本出自广西；Hanvueng=Goose King 的对音与安王/罕温的对应关系属 N1 考订任务"
+    },
+    {
+      "id": "nakui-1600",
+      "short": "望谟纳魁村本",
+      "title": "祖王与安王",
+      "collected_by": "韦永奎搜集整理",
+      "publisher": "《布依族摩经文学》，贵州民族出版社",
+      "year": 1997,
+      "extent": "1600余行（发表时只刊出译文）",
+      "role_in_version_chain": "version_of 候选",
+      "acquisition": "未获取；只登记",
+      "source_of_bibliographic_data": "云村寨《摩经》篇存档"
+    },
+    {
+      "id": "guge-1998",
+      "short": "古歌本（本仓库主料）",
+      "title": "布依族古歌·安王与祖王",
+      "translated_by": "黄义仁翻译整理",
+      "publisher": "《布依族古歌》，贵州民族出版社",
+      "year": 1998,
+      "extent": "约560余行（本仓库切片实计意译句 540 句，p904-985）",
+      "role_in_version_chain": "本图谱的事实层基准（证据指针只指向本三册语料）",
+      "acquisition": "已入库（布依族资源/ 快照，canon v1.0-ocr）",
+      "source_of_bibliographic_data": "云村寨《摩经》篇存档 + 篇尾元数据（full 层 p985：搜集整理黄义仁、唱述人望谟县城关镇上院廖家园、搜集时间1962年4月）互证",
+      "note": "云村寨称本子为望谟系版本——与篇尾唱述人籍贯望谟一致"
+    },
+    {
+      "id": "ceheng-1500",
+      "short": "册亨版",
+      "title": "安王",
+      "recorded_by": "王汉文记录，卢衍翻译整理",
+      "publisher": "《民族志资料汇编》第六集（内部资料）",
+      "year": 1988,
+      "extent": "1500余行",
+      "role_in_version_chain": "version_of 候选",
+      "acquisition": "未获取；只登记",
+      "source_of_bibliographic_data": "云村寨《摩经》篇存档"
+    },
+    {
+      "id": "zhenfeng-bahao",
+      "short": "贞丰岜浩本",
+      "title": "告王（赎头经，或《告方》）",
+      "publisher": null,
+      "year": null,
+      "extent": "300余行",
+      "role_in_version_chain": "version_of 候选；赎头仪式功能直接对应本",
+      "acquisition": "未获取；只登记",
+      "source_of_bibliographic_data": "云村寨《摩经》篇存档"
+    },
+    {
+      "id": "zhenfeng-nachan",
+      "short": "贞丰纳禅本",
+      "title": "安王与祖王",
+      "publisher": null,
+      "year": null,
+      "extent": "700余行",
+      "role_in_version_chain": "version_of 候选",
+      "acquisition": "未获取；只登记",
+      "source_of_bibliographic_data": "云村寨《摩经》篇存档"
+    },
+    {
+      "id": "hanwen-suowen",
+      "short": "《罕温与索温》异名本",
+      "title": "罕温与索温",
+      "status": "待考订（N1）",
+      "role_in_version_chain": "异名本；是否与安王与祖王同篇存疑",
+      "acquisition": "只登记",
+      "source_of_bibliographic_data": "设计方案 §1.4（《山水布依》著录）；云村寨两篇存档矛盾记载（见 name_variants_N1）"
+    },
+    {
+      "id": "daguan-mubodong",
+      "short": "大观《穆播董》复述",
+      "title": "布依族文化大观·第四章（P121-122《穆播董》）",
+      "publisher": "贵州省民族事务委员会编，贵州民族出版社",
+      "role_in_version_chain": "散文复述层；parallel_passage 对齐目标（已切片：versions/daguan_mubodong_p121-122.jsonl）",
+      "acquisition": "已入库（布依族资源/ 快照，canon v1.1-ocr）",
+      "source_of_bibliographic_data": "本仓库语料实测"
+    },
+    {
+      "id": "zhou-guomao-project",
+      "short": "周国茂国家社科课题",
+      "title": "布依族史诗典籍《安王与祖王》珍善本搜集整理研究（国家社科基金课题）",
+      "pi": "周国茂",
+      "role_in_version_chain": "二手研究；珍善本版本线索可能由此扩展",
+      "acquisition": "只登记",
+      "source_of_bibliographic_data": "设计方案 §1.4"
+    }
+  ],
+  "name_variants_N1": {
+    "task": "译名考订（设计方案 S1 考订任务 N1）：安王/罕温/Hanvueng、祖王/索温/岸王·梭王 对应关系",
+    "status": "待考订；未考订前不建 sameAs",
+    "evidence_registered": [
+      {"claim": "《安王与祖王》或译《罕温与索温》《岸王与梭王》", "source": "云村寨《摩经》篇（253819）", "weight": "直接同篇说，但为转述性表述"},
+      {"claim": "《罕温与索温》被叙述为射日·洪水型故事（主人公文信、雷公铁笼、葫芦兄妹）", "source": "云村寨《论王》篇（221036）", "weight": "与同篇说矛盾；若属实则《罕温与索温》非本篇异名本"},
+      {"claim": "贞丰《招魂歌》（即《汗王与梭王》）为丧葬经卷", "source": "云村寨《摩经》篇殡亡经书目语境", "weight": "音近异写（汗/罕、梭/索）待勘"},
+      {"claim": "Holm 本 Hanvueng=Goose King，文本出自广西", "source": "设计方案 §1.4", "weight": "对音待考；'雁王/鹅王'义与安王故事元素的关联待文本验证"}
+    ]
+  }
+}
