@@ -1,5 +1,9 @@
 # 原件扫描 PDF（体积大且有版权，不入库）
-布依族资料/01_原件PDF/
+**/01_原件PDF/
 
-# macOS
+# macOS / IDE
 .DS_Store
+.idea/
+
+# ZCode 会话内部文件
+.zcode/
