@@ -2,6 +2,7 @@
   "piece": "安王与祖王",
   "piece_id": "awzw",
   "generated": "2026-09-29",
+  "updated": "2026-09-29（N1 考订完成，见 versions/译名考订小记_N1.md）",
   "policy": "外部资料只登记书目信息与版本链，不获取全文、不作为事实证据指针（设计方案 §4.2 纪律）；获取全文另立任务（实体书/馆际），不阻塞主线。",
   "entries": [
     {
@@ -9,28 +10,31 @@
       "short": "望谟1994整理本",
       "title": "安王与祖王",
       "editor_org": "望谟县民族事务委员会编",
-      "recorded_by": "黄荣昌、黄仕才记录整理",
-      "revised_by": "王伟校订，周国炎加工统编",
+      "recorded_by": "黄荣昌、黄仕才记录整理（源自石屯镇白头坡摩公韦文坤口传，民间无手抄本）",
+      "revised_by": "王伟校订布依文/国际音标，周国炎加工统编",
       "publisher": "贵州民族出版社",
       "year": 1994,
+      "year_note": "另有 1997 一说（《摩教语言艺术》）；多数源采 1994 出版、1997-06 获第三届全国民族图书三等奖",
       "extent": "1700余行（最长整理本）",
-      "role_in_version_chain": "version_of 目标；篇幅与情节完整度对照基准",
+      "role_in_version_chain": "version_of 目标；篇幅与情节完整度对照基准（梗概含混沌王前史/鱼女=龙王之女/井难救助=龙王/十二个太阳降灾/分治+纳贡结局——见 译名考订小记 §八.4）",
       "acquisition": "未获取全文；只登记（实体书/馆际另立任务）",
-      "source_of_bibliographic_data": "云村寨《摩经》篇存档（versions/yuncunzhai/摩经_布依族历史文化的重要载体.md）；设计方案 §1.4"
+      "source_of_bibliographic_data": "贵州省非遗保护中心官方页（versions/gzfwz_非遗_布依族史诗安王与祖王_望谟县.md）；云村寨《摩经》篇、《摩教语言艺术》篇存档"
     },
     {
       "id": "holm-hanvueng",
       "short": "Holm英译本",
-      "title": "Hanvueng: The Goose King and the Ancestral King: A Zhuang Verse Text from Guangxi",
-      "translator_annotator": "David Holm（译注，含原抄本对照）",
+      "title": "Hanvueng: The Goose King and the Ancestral King: An Epic from Guangxi in Southern China",
+      "native_title": "Haansweangz riangz Xocweangz —— Anwang yu Zuwang（即《安王与祖王》）",
+      "translator_annotator": "David Holm 与 Meng Yuanyao 译注（Luo Yongxian 参与，角色待核）",
       "series": "Zhuang Traditional Texts Series 第1卷",
       "publisher": "Brill",
-      "year": null,
-      "extent": null,
-      "role_in_version_chain": "version_of 目标；国际平行体诗学互证",
+      "year": 2015,
+      "isbn": "9789004285613",
+      "extent": "约1500行韵文，含原抄本对照；两继兄弟之争，流传于壮、布依等侗台族群",
+      "role_in_version_chain": "version_of 目标；国际平行体诗学互证；N1 考订最强证据之一（E3，史诗原题即安王与祖王）",
       "acquisition": "未获取全文；只登记",
-      "source_of_bibliographic_data": "设计方案 §1.4（Brill《Zhuang Traditional Texts Series》）",
-      "note": "Holm 本文本出自广西；Hanvueng=Goose King 的对音与安王/罕温的对应关系属 N1 考订任务"
+      "source_of_bibliographic_data": "Holm 2017 Oral Tradition 31(2)；Brill/Amazon 书目",
+      "note": "Hanvueng ≈ Haansweangz ＝ 安王 ＝ 罕温（N1 已考订同一）；Goose King 为意译 gloss"
     },
     {
       "id": "nakui-1600",
@@ -52,10 +56,9 @@
       "publisher": "《布依族古歌》，贵州民族出版社",
       "year": 1998,
       "extent": "约560余行（本仓库切片实计意译句 540 句，p904-985）",
-      "role_in_version_chain": "本图谱的事实层基准（证据指针只指向本三册语料）",
+      "role_in_version_chain": "本图谱的事实层基准（证据指针只指向本三册语料）；望谟系简本",
       "acquisition": "已入库（布依族资源/ 快照，canon v1.0-ocr）",
-      "source_of_bibliographic_data": "云村寨《摩经》篇存档 + 篇尾元数据（full 层 p985：搜集整理黄义仁、唱述人望谟县城关镇上院廖家园、搜集时间1962年4月）互证",
-      "note": "云村寨称本子为望谟系版本——与篇尾唱述人籍贯望谟一致"
+      "source_of_bibliographic_data": "云村寨《摩经》篇存档 + 篇尾元数据（full 层 p985，已人工复核）互证"
     },
     {
       "id": "ceheng-1500",
@@ -76,7 +79,7 @@
       "publisher": null,
       "year": null,
       "extent": "300余行",
-      "role_in_version_chain": "version_of 候选；赎头仪式功能直接对应本",
+      "role_in_version_chain": "version_of 候选；赎头仪式功能直接对应本；岜浩村亦为《温经》13节本采集地（周国茂2013）",
       "acquisition": "未获取；只登记",
       "source_of_bibliographic_data": "云村寨《摩经》篇存档"
     },
@@ -95,10 +98,10 @@
       "id": "hanwen-suowen",
       "short": "《罕温与索温》异名本",
       "title": "罕温与索温",
-      "status": "待考订（N1）",
-      "role_in_version_chain": "异名本；是否与安王与祖王同篇存疑",
-      "acquisition": "只登记",
-      "source_of_bibliographic_data": "设计方案 §1.4（《山水布依》著录）；云村寨两篇存档矛盾记载（见 name_variants_N1）"
+      "status": "已考订（2026-09-29，N1）：与《安王与祖王》同篇异名（多数裁定 6:1，加权约88%）",
+      "role_in_version_chain": "version_of（可建）；罕温=安王=Haansweangz，索温=祖王=Xocweangz；少数异说（《论王》篇洪水概述）保留注记 N1-a",
+      "acquisition": "只登记；彭苇等《兴义民族师范学院学报》论文为该题名专题研究，全文待 CNKI 核取",
+      "source_of_bibliographic_data": "译名考订小记_N1.md 证据清单 E1-E7"
     },
     {
       "id": "daguan-mubodong",
@@ -117,16 +120,37 @@
       "role_in_version_chain": "二手研究；珍善本版本线索可能由此扩展",
       "acquisition": "只登记",
       "source_of_bibliographic_data": "设计方案 §1.4"
+    },
+    {
+      "id": "feiyi-2025",
+      "short": "省级非遗名录条目",
+      "title": "布依族史诗（安王与祖王）（望谟县）",
+      "publisher": "贵州省人民政府第六批省级非物质文化遗产代表性项目名录",
+      "year": 2025,
+      "role_in_version_chain": "官方背景层；布依文罗马字（Haansweangz/Xocweangz）权威来源",
+      "acquisition": "已存档（versions/gzfwz_非遗_布依族史诗安王与祖王_望谟县.md）",
+      "source_of_bibliographic_data": "贵州省非遗保护中心官网"
     }
   ],
   "name_variants_N1": {
     "task": "译名考订（设计方案 S1 考订任务 N1）：安王/罕温/Hanvueng、祖王/索温/岸王·梭王 对应关系",
-    "status": "待考订；未考订前不建 sameAs",
+    "status": "已裁定（2026-09-29）：同篇异名成立——多数裁定 6:1（加权 22:3，约88%），少数异说保留注记",
+    "verdict": {
+      "Haansweangz": ["安王", "罕温", "Hanvueng", "岸王(?)"],
+      "Xocweangz": ["祖王", "索温", "梭王"],
+      "sameAs_allowed": true,
+      "gloss_note": "Goose King（Holm 意译）与非遗页'汉'音韵联想并存，gloss 不影响同一性"
+    },
+    "method": "联网检索8组查询 → 证据分级加权（官方5/国际学术5/期刊4/平台3/社区2）→ 多数裁定 + 少数注记（用户指定方法）",
+    "report": "versions/译名考订小记_N1.md",
     "evidence_registered": [
-      {"claim": "《安王与祖王》或译《罕温与索温》《岸王与梭王》", "source": "云村寨《摩经》篇（253819）", "weight": "直接同篇说，但为转述性表述"},
-      {"claim": "《罕温与索温》被叙述为射日·洪水型故事（主人公文信、雷公铁笼、葫芦兄妹）", "source": "云村寨《论王》篇（221036）", "weight": "与同篇说矛盾；若属实则《罕温与索温》非本篇异名本"},
-      {"claim": "贞丰《招魂歌》（即《汗王与梭王》）为丧葬经卷", "source": "云村寨《摩经》篇殡亡经书目语境", "weight": "音近异写（汗/罕、梭/索）待勘"},
-      {"claim": "Holm 本 Hanvueng=Goose King，文本出自广西", "source": "设计方案 §1.4", "weight": "对音待考；'雁王/鹅王'义与安王故事元素的关联待文本验证"}
+      {"id": "E1", "claim": "《安王与祖王》或译《罕温与索温》《岸王与梭王》", "source": "云村寨《摩经》篇", "stance": "赞成"},
+      {"id": "E2", "claim": "《安王与祖王》或译为《祖王与安王》《罕温与索温》等；一些地区版本掺进洪水与人类再生的情节", "source": "云村寨《摩教语言艺术》", "stance": "赞成+解释框架"},
+      {"id": "E3", "claim": "Holm 本史诗原题即 Haansweangz riangz Xocweangz——Anwang yu Zuwang（安王与祖王）", "source": "Brill 2015 / Oral Tradition 31(2), 2017", "stance": "赞成（最强单证）"},
+      {"id": "E4", "claim": "安王=Haansweangz、祖王=Xocweangz（语音桥）", "source": "贵州省非遗保护中心官方页", "stance": "赞成"},
+      {"id": "E5", "claim": "《罕温与索温》含鱼龙图腾+太阳意象（安王故事核心要素）", "source": "兴义民族师范学院学报论文（彭苇等）", "stance": "赞成"},
+      {"id": "E6", "claim": "列举性同篇提及", "source": "僚人家园", "stance": "赞成（弱）"},
+      {"id": "E7", "claim": "《罕温与索温》为射日·洪水型故事（文信/雷公铁笼/葫芦兄妹），未提兄弟争斗", "source": "云村寨《论王》篇", "stance": "反对（少数，保留注记 N1-a）"}
     ]
   }
 }
