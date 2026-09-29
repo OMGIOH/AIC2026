@@ -3,15 +3,15 @@
 
 规则代码，仅用 Python 标准库。语料输入为本仓库快照 `布依族资源/`（canon 与源项目一致）。
 
-产出（相对仓库根）：
-  pieces/awzw/awzw_yi_verses.jsonl                    意译层切片（verse 级，十四节拍标注+指针）
-  pieces/awzw/awzw_full_lines.jsonl                   full 层切片（行级，同页范围，含散文导读）
-  pieces/awzw/qa/tail_p983-989.txt                    篇尾乱码区逐行查验件（人工核对入口）
-  pieces/awzw/versions/daguan_mubodong_p121-122.jsonl 大观《穆播董》整页切片
-  pieces/awzw/versions/daguan_mubodong_p121-122.txt   同上可读版
-  pieces/awzw/versions/daguan_hit_pages.csv           大观全本 安王/祖王/盘果 逐页命中
-  pieces/awzw/piece_meta.json
-  pieces/awzw/s0_report.md
+产出（脚本与产出同位于 实验流程/S0_切片与版本语料集/）：
+  awzw/awzw_yi_verses.jsonl                    意译层切片（verse 级，十四节拍标注+指针）
+  awzw/awzw_full_lines.jsonl                   full 层切片（行级，同页范围，含散文导读）
+  awzw/qa/tail_p983-989.txt                    篇尾乱码区逐行查验件（人工核对入口）
+  awzw/versions/daguan_mubodong_p121-122.jsonl 大观《穆播董》整页切片
+  awzw/versions/daguan_mubodong_p121-122.txt   同上可读版
+  awzw/versions/daguan_hit_pages.csv           大观全本 安王/祖王/盘果 逐页命中
+  awzw/piece_meta.json
+  awzw/s0_report.md
 """
 
 import csv
@@ -22,9 +22,10 @@ import sys
 from datetime import date
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+HERE = Path(__file__).resolve().parent   # 实验流程/S0_切片与版本语料集
+ROOT = HERE.parents[1]                   # 仓库根 AIC2026
 CORPUS = ROOT / "布依族资源"
-OUT = ROOT / "pieces" / "awzw"
+OUT = HERE / "awzw"
 
 PIECE = "安王与祖王"
 PIECE_ID = "awzw"
