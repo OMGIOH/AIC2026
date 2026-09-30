@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>《安王与祖王》人物知识图谱 · 初步 Demo</title>
+<style>
+  :root{
+    --bg:#f5f1e8; --panel:#fffdf8; --panel2:#faf6ec; --ink:#292524; --ink2:#57534e;
+    --line:#e2d9c6; --accent:#b91c1c; --fact:#52525b; --version:#2563eb; --cross:#9333ea;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{font-family:"PingFang SC","Hiragino Sans GB","Songti SC","Microsoft YaHei",sans-serif;
+       background:var(--bg); color:var(--ink); display:flex; flex-direction:column; overflow:hidden;}
+  header{background:#322d29; color:#f5f1e8; padding:10px 18px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;}
+  header h1{font-size:17px; font-weight:600; letter-spacing:.5px;}
+  .badge-demo{background:var(--accent); color:#fff; font-size:11px; padding:2px 8px; border-radius:10px; white-space:nowrap;}
+  .stats{display:flex; gap:8px; flex-wrap:wrap;}
+  .stats span{background:#4a423c; border-radius:4px; padding:3px 9px; font-size:12px; color:#e8e0d0;}
+  #search{margin-left:auto; background:#4a423c; border:1px solid #6b5f55; color:#f5f1e8; border-radius:6px;
+          padding:5px 10px; font-size:13px; width:230px; outline:none;}
+  #search::placeholder{color:#b3a794;}
+  #app{flex:1; display:flex; min-height:0;}
+  aside#left{width:212px; background:var(--panel); border-right:1px solid var(--line); padding:12px; overflow-y:auto; flex-shrink:0;}
+  aside#detail{width:330px; background:var(--panel); border-left:1px solid var(--line); overflow-y:auto; flex-shrink:0;}
+  #app.entity-open aside#detail{display:none;}
+  .entity-anim{animation:epIn .3s ease;}
+  @keyframes epIn{from{opacity:0; transform:translateY(12px);} to{opacity:1; transform:none;}}
+  #view-entity{overflow-y:auto; padding:26px 40px; background:var(--bg);}
+  .ep-wrap{max-width:940px; margin:0 auto;}
+  .ep-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+  .back-btn{border:1px solid var(--line); background:var(--panel2); border-radius:6px; padding:5px 14px;
+            font-size:13px; color:var(--ink2); cursor:pointer;}
+  .back-btn:hover{border-color:#b49f78; color:var(--ink);}
+  .ep-badge{font-size:11px; color:#f5f1e8; background:#322d29; border-radius:9px; padding:3px 11px; white-space:nowrap;}
+  .ep-name{font-size:26px; font-weight:700; margin:14px 0 8px;}
+  .ep-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px 34px; align-items:start; margin-top:6px;}
+  .ep-col{min-width:0;}
+  .media-row{display:flex; gap:12px; margin:6px 0 10px;}
+  .media-slot{flex:1; aspect-ratio:16/9; border:1.5px dashed #cbbc9c; border-radius:10px; background:var(--panel2);
+              display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; color:#a39a88;}
+  .media-slot .m-ico{width:34px; height:34px; border-radius:50%; background:#e7dfcc; color:#8a8070;
+                     display:flex; align-items:center; justify-content:center;}
+  .media-slot b{font-size:13px; font-weight:600;}
+  .media-slot span{font-size:11px;}
+  main#main{flex:1; position:relative; min-width:0;}
+  .tabs{display:flex; gap:4px; margin-bottom:14px;}
+  .tab{flex:1; padding:7px 0; border:1px solid var(--line); background:var(--panel2); cursor:pointer;
+       border-radius:6px; font-size:13px; color:var(--ink2);}
+  .tab.active{background:#322d29; color:#f5f1e8; border-color:#322d29;}
+  #legend h3{font-size:12px; color:var(--ink2); margin:12px 0 6px; font-weight:600;}
+  .lg-row{display:flex; align-items:center; gap:6px; font-size:12px; padding:2px 0; cursor:pointer; color:var(--ink);}
+  .lg-row.off{opacity:.35;}
+  .lg-dot{width:11px; height:11px; border-radius:50%; flex-shrink:0;}
+  .lg-line{width:18px; height:0; border-top:3px solid; flex-shrink:0;}
+  .lg-count{margin-left:auto; color:var(--ink2); font-size:11px;}
+  #view-help{margin-top:14px; font-size:11px; color:#8a8070; line-height:1.7; border-top:1px dashed var(--line); padding-top:10px;}
+  #btn-reset{margin-top:10px; width:100%; padding:6px; border:1px solid var(--line); background:var(--panel2);
+             border-radius:6px; cursor:pointer; font-size:12px; color:var(--ink2);}
+  .view{position:absolute; inset:0;}
+  .view.hidden{display:none;}
+  svg{display:block; width:100%; height:100%; cursor:grab;}
+  svg.panning{cursor:grabbing;}
+  .edge{stroke-linecap:round;}
+  .edge-label{font-size:9.5px; fill:var(--ink2); paint-order:stroke; stroke:#f5f1e8; stroke-width:3px;
+              pointer-events:none; user-select:none;}
+  .edge-hit{stroke:transparent; stroke-width:12; cursor:pointer;}
+  .node{cursor:pointer;}
+  .node text{font-size:11.5px; fill:var(--ink); text-anchor:middle; pointer-events:none; user-select:none;
+             paint-order:stroke; stroke:#f5f1e8; stroke-width:3px;}
+  .node.ext circle{stroke-dasharray:4 3;}
+  .node.selected circle{stroke:#b91c1c; stroke-width:3px;}
+  .node.dimmed{opacity:.16;}
+  .node.matched circle{stroke:#b91c1c; stroke-width:2.5px; stroke-dasharray:none;}
+  .edge.dimmed{opacity:.12;}
+  .edge-label.dimmed{opacity:.12;}
+  /* 时间线 */
+  #view-timeline{overflow-y:auto; padding:22px 30px; background:var(--bg);}
+  .tl-rail{position:relative; max-width:880px; margin:0 auto; padding-left:56px;}
+  .tl-rail::before{content:""; position:absolute; left:19px; top:8px; bottom:8px; width:2px; background:#d8cdb4;}
+  .beat{position:relative; margin-bottom:14px;}
+  .beat-no{position:absolute; left:-56px; top:2px; width:38px; height:38px; border-radius:50%;
+           background:#322d29; color:#f5f1e8; display:flex; align-items:center; justify-content:center;
+           font-size:13px; font-weight:600;}
+  .beat-card{background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px 16px; cursor:pointer;}
+  .beat-card:hover{border-color:#b49f78;}
+  .beat-card.selected{border-color:var(--accent); box-shadow:0 0 0 1px var(--accent);}
+  .beat-title{font-size:14px; font-weight:600; margin-bottom:4px;}
+  .beat-pages{font-size:11.5px; color:var(--ink2); margin-bottom:7px;}
+  .chips{display:flex; flex-wrap:wrap; gap:5px;}
+  .chip{font-size:11px; padding:2px 8px; border-radius:10px; background:var(--panel2); border:1px solid var(--line); cursor:pointer;}
+  .chip:hover{border-color:#b49f78;}
+  .chip .cdot{display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:4px; vertical-align:0;}
+  .chip-sub{font-size:11px; color:var(--ink2); margin-right:2px;}
+  .ev-count{font-size:11px; color:#8a8070;}
+  .sub-beats{margin-top:10px; display:flex; flex-direction:column; gap:6px;}
+  .sub-card{background:var(--panel2); border:1px dashed #cbbc9c; border-radius:6px; padding:8px 12px; cursor:pointer;}
+  .sub-card:hover{border-color:#b49f78;}
+  .sub-card.selected{border-color:var(--accent);}
+  .sub-title{font-size:12.5px; font-weight:600; margin-bottom:3px;}
+  .sub-pair{font-size:11.5px; color:var(--ink2); line-height:1.6;}
+  /* 实体表 */
+  #view-entities{overflow-y:auto; padding:22px 30px; background:var(--bg);}
+  .ent-wrap{max-width:980px; margin:0 auto;}
+  .ent-group{margin-bottom:18px;}
+  .ent-group h3{font-size:13px; margin-bottom:6px; color:var(--ink); display:flex; align-items:center; gap:7px;}
+  .ent-group h3 .lg-dot{width:10px; height:10px;}
+  table{width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--line); border-radius:8px; overflow:hidden;}
+  th{font-size:11px; text-align:left; color:var(--ink2); background:var(--panel2); padding:6px 12px; font-weight:600;}
+  td{font-size:12.5px; padding:6px 12px; border-top:1px solid #efe8d8; cursor:pointer;}
+  tr:hover td{background:#fdf9ee;}
+  tr.selected td{background:#fbf1e2;}
+  td.dim-name{color:#9a9080;}
+  .tag{font-size:10px; padding:1px 6px; border-radius:8px; background:#eef4e8; color:#4d7c0f; margin-left:6px; white-space:nowrap;}
+  .tag.off{background:#f1ece0; color:#a39a88;}
+  .tag.ext{background:#f3f0ea; color:#8a8070;}
+  /* 详情面板 */
+  #detail-content{padding:16px;}
+  .d-empty{color:#9a9080; font-size:12.5px; text-align:center; margin-top:40px; line-height:1.8;}
+  .d-title{font-size:16px; font-weight:700; margin-bottom:6px;}
+  .d-badges{display:flex; gap:5px; flex-wrap:wrap; margin-bottom:10px;}
+  .d-badge{font-size:10.5px; padding:2px 8px; border-radius:9px; background:var(--panel2); border:1px solid var(--line); color:var(--ink2);}
+  .d-sec{font-size:11.5px; font-weight:700; color:var(--ink2); margin:13px 0 5px; text-transform:letter-spacing;}
+  .d-text{font-size:12.5px; line-height:1.75; color:var(--ink);}
+  .d-note{font-size:11.5px; color:var(--ink2); background:var(--panel2); border-left:3px solid #cbbc9c; padding:7px 10px; border-radius:0 5px 5px 0; line-height:1.65; margin-top:4px;}
+  .quote{font-size:12px; line-height:1.65; padding:6px 9px; background:var(--panel2); border-radius:5px; margin-bottom:5px;}
+  .quote .qp{color:#8a6d3b; font-size:10.5px; font-family:ui-monospace,Menlo,monospace;}
+  .quote .qt{color:var(--ink);}
+  .link-list{display:flex; flex-direction:column; gap:3px;}
+  .lk{font-size:12px; color:#1d4ed8; cursor:pointer; line-height:1.6; word-break:break-all;}
+  .lk:hover{text-decoration:underline;}
+  .lk .rel{color:var(--ink2); font-size:11px;}
+  .kv{font-size:12px; line-height:1.7;}
+  .kv b{color:var(--ink2); font-weight:600;}
+  .arrow-relation{display:flex; align-items:center; gap:8px; margin:8px 0; font-size:14px;}
+  .arrow-relation .end{font-weight:700;}
+  .arrow-relation .rel-badge{background:#322d29; color:#f5f1e8; padding:3px 12px; border-radius:5px; font-size:13px;}
+  footer{background:#322d29; color:#b3a794; font-size:11px; padding:6px 18px; line-height:1.5;}
+</style>
+</head>
+<body>
+<header>
+  <h1>《安王与祖王》人物知识图谱</h1>
+  <span class="badge-demo">初步 DEMO · S0–S2 数据预览</span>
+  <div class="stats" id="stats"></div>
+  <input id="search" placeholder="搜索实体：安王 / 祖王 / 鱼女 …" autocomplete="off">
+</header>
+<div id="app">
+  <aside id="left">
+    <nav class="tabs">
+      <button class="tab active" data-view="graph">图谱</button>
+      <button class="tab" data-view="timeline">事件</button>
+      <button class="tab" data-view="entities">实体</button>
+      <button class="tab" data-view="entity" id="tab-entity" style="display:none">实体页</button>
+    </nav>
+    <div id="legend">
+      <h3>节点类型（点击显隐）</h3>
+      <div id="type-legend"></div>
+      <h3>边层级（点击显隐）</h3>
+      <div id="layer-legend"></div>
+      <h3>显示选项</h3>
+      <div class="lg-row" id="toggle-edge-labels"><span class="lg-line" style="border-top-style:dotted;border-color:#8a8070;"></span>边关系标签<span class="lg-count" id="edge-label-state">开</span></div>
+    </div>
+    <button id="btn-reset">重置视图与筛选</button>
+    <div id="view-help">
+      图谱：拖拽节点 / 滚轮缩放 / 空白处拖动平移；点击人物小球直接切换到实体页，其他节点或边点击后右侧看证据。<br>
+      事件：十四节拍主线，斗法三对为 b07 子事件。<br>
+      实体：S1 白名单全 39 项 + 外部版本件占位。
+    </div>
+  </aside>
+  <main id="main">
+    <div id="view-graph" class="view"><svg id="svg"></svg></div>
+    <div id="view-timeline" class="view hidden"></div>
+    <div id="view-entities" class="view hidden"></div>
+    <div id="view-entity" class="view hidden"></div>
+  </main>
+  <aside id="detail"><div id="detail-content">
+    <div class="d-empty">点击左侧视图中的节点、边或事件卡片<br>此处显示详情与语料证据</div>
+  </div></aside>
+</div>
+<footer id="foot"></footer>
+<script>const GRAPH = {"meta": {"title": "《安王与祖王》人物知识图谱 · 初步 Demo", "generated": "2026-09-30", "canon_version": "v1.0-ocr（古歌本 p904–985）", "counts": {"nodes": 50, "edges": 47, "events": 17, "attributes": 18, "whitelist": 39, "external": 11, "in_graph_whitelist": 29}, "sources": ["实验流程/S1_人物表与译名考订/entities.jsonl", "实验流程/S2_三轮抽取/triples.jsonl", "实验流程/S2_三轮抽取/events.jsonl", "实验流程/S2_三轮抽取/attributes.jsonl"], "footer": "初步 Demo（非 S4 正式产出）：数据取自 S0–S2 产出；证据指针仅指向《布依族古歌》本（canon v1.0-ocr），外部资料仅作版本链/sameAs；外部版本件为占位节点；边 verified 状态由 S3 回验后更新。重新生成：python3 demo/build_demo.py"}, "nodes": [{"id": "person_anwang", "name": "安王", "type": "Person", "kind": "半神", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 910, "line_no": 4, "text": "于是生下了安王。"}, "aliases": {"罕温": {"type": "音译", "adjudication": "N1已考订同一", "report": "实验流程/S1_人物表与译名考订/译名考订小记_N1.md"}, "Hanvueng": {"type": "Holm罗马字", "adjudication": "N1已考订同一"}, "Haansweangz": {"type": "布依文（非遗官方）", "adjudication": "N1已考订同一"}, "岸王": {"type": "异写", "adjudication": "待核（音理：岸ng-/罕h-）"}, "Goose King": {"type": "Holm意译gloss", "adjudication": "gloss不影响同一性"}}, "ref_forms": [{"form": "安王", "range": "p910-983", "count": 58, "note": "主称形"}, {"form": "大哥/哥哥", "range": "p941-985", "note": "祖王及对答中称谓"}, {"form": "王", "range": "p913 L7", "note": "「王十三岁成孤儿」"}], "notes": ["kind=半神判定证据链见 evidence_kind（设计 §3-S2-R1 要求）", "结局：飞上天、居天上、令祖王年年纳贡（p979-985）"]}, {"id": "person_zuwang", "name": "祖王", "type": "Person", "kind": "凡人", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 933, "line_no": 5, "text": "于是生下祖王。"}, "aliases": {"索温": {"type": "音译", "adjudication": "N1已考订同一", "report": "实验流程/S1_人物表与译名考订/译名考订小记_N1.md"}, "Xocweangz": {"type": "布依文（非遗官方）", "adjudication": "N1已考订同一"}, "梭王": {"type": "异写", "adjudication": "N1已考订同一"}, "Ancestral King": {"type": "Holm意译gloss", "adjudication": "gloss不影响同一性"}}, "ref_forms": [{"form": "祖王", "range": "p933-985", "count": 33, "note": "主称形"}, {"form": "弟弟/小弟", "range": "p941-976", "note": "对答中称谓"}], "notes": ["结局：居下方、年年纳贡、百姓平民皆欢喜（p984-985）"]}, {"id": "person_panguo", "name": "盘果", "type": "Person", "kind": "凡人", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 904, "line_no": 10, "text": "盘果跨过河，"}, "aliases": null, "ref_forms": [{"form": "盘果", "range": "p904-927", "count": 15, "note": "主称形；渔夫"}, {"form": "盘果王", "range": "p926 L4", "note": "「盘果王呀盘果王」——文中唯一「王」称"}, {"form": "父亲/父王", "range": "p962-974", "note": "病中与安王对答"}, {"form": "鳏夫", "range": "p914, p922", "note": "「盘果二十五岁成鳏夫」"}], "notes": ["望谟长版另有「混沌王」前史一代（外部版本，不入节点）", "结局：气愤生大病、催安王回来（p962）"]}, {"id": "person_yunv", "name": "鱼女", "type": "Person", "kind": "半神", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 906, "line_no": 2, "text": "鱼吹笛子来匆匆，"}, "aliases": null, "ref_forms": [{"form": "鱼女", "range": "p907", "count": 2, "note": "唯一具名处"}, {"form": "鱼", "range": "p906, p977", "note": "化身形态（吹笛弹弦；「同安王的母亲是鱼」）"}, {"form": "安王母亲/母亲", "range": "p912-913, p977", "note": "人母形态"}, {"form": "妈", "range": "p912", "note": "安王呼语"}], "notes": ["称形统一完成：鱼女=鱼=安王母亲=母亲/妈（页级分工见 ref_forms）", "结局：遁水消失（p913），井难时显灵救子（p977-978）"]}, {"id": "person_xuanwang", "name": "玄王", "type": "Person", "kind": "凡人（推测）", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 959, "line_no": 6, "text": "逃到玄王住的河头上，"}, "aliases": null, "ref_forms": [{"form": "玄王", "range": "p959", "count": 1, "note": "全篇唯一见"}], "notes": ["单见复核完成：直译+意译两层均在（非OCR幻觉），保留入谱", "出现于安王威胁语（beat 7）；语义为地名锚定人（「玄王住的河头」）", "S2 建边时作为 located 锚点而非行动者"]}, {"id": "role_stepmother", "name": "后母", "type": "RoleFigure", "kind": "凡人", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 918, "line_no": 6, "text": "警见一妇女长得好，（婚前形态·被媒人相中）"}, "aliases": null, "ref_forms": [{"form": "妇人", "range": "p918-932", "note": "婚前形态（说媒段对象）"}, {"form": "（他的妻子）", "range": "p919 L3", "note": "媒人转述"}, {"form": "祖王母亲", "range": "p935", "note": "打水遇安王痛哭"}, {"form": "王母", "range": "p937-946", "note": "送饭/唆使段主称形"}, {"form": "母亲", "range": "p939", "note": "送早饭、安排饭食"}, {"form": "后母/继母", "range": "p938", "note": "「安王听从后母话／接受继母的叮咛」"}], "notes": ["同一实体两形态：婚前作「妇人/寡妇」（p918-932），婚后即后母", "p919「且命昨夜已死去」中「且命」疑OCR噪声（待核）", "唆使原句 p947 L3-8：「寨子不散我要它散…杀死安王夺大印」", "偏待证据：p939-943 送饭不均（哥艾枝下/弟枸树上；小米东兰菜 vs 白米鱼肉）"]}, {"id": "role_merchant_1", "name": "大商人", "type": "RoleFigure", "kind": "凡人", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 915, "line_no": 8, "text": "巧遇两个生意人，"}, "aliases": null, "ref_forms": [{"form": "生意人", "range": "p915", "note": "初遇"}, {"form": "青年/客人", "range": "p916", "note": "借宿对答"}, {"form": "媒人", "range": "p920-921", "note": "第一次说媒"}, {"form": "二媒/俩媒人", "range": "p926, p928", "note": "二人合称"}], "notes": ["文本以「两个/俩」对称出现，个体无独立情节", "S2 建边说媒边时可对称建两条或合并为一条（待人工定）", "媒人说辞含 p922-923（鱼/凤/龙/大印/锦鸡图印等比喻）"]}, {"id": "role_merchant_2", "name": "二商人", "type": "RoleFigure", "kind": "凡人", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 915, "line_no": 8, "text": "巧遇两个生意人，（二人同现）"}, "aliases": null, "ref_forms": [{"form": "两个青年/两位青年", "range": "p916", "note": "对答"}, {"form": "二媒", "range": "p926", "note": "「二媒回来就开口」"}, {"form": "俩媒人", "range": "p928", "note": "第二次说媒"}], "notes": ["与 role_merchant_1 对称；第二次说媒（p928-932）成功促成婚事"]}, {"id": "role_fish_grandparents", "name": "外祖父母（大青鱼·大鲶鱼）", "type": "RoleFigure", "kind": "动物角色", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 911, "line_no": 7, "text": "我得一条大青鱼，"}, "aliases": null, "ref_forms": [{"form": "大青鱼/大鲶鱼", "range": "p910-912", "note": "被安王捕获的鱼（本体）"}, {"form": "外祖父和外祖母", "range": "p912 L6", "note": "鱼女言明身份"}, {"form": "大舅/小舅", "range": "p913 L2-3", "note": "安王对答中提及的鱼族亲缘"}], "notes": ["与鱼女同属鱼族亲缘网（图腾链核心）", "古歌本未叙其结局（安王欲烹未果）；大观复述作「鱼是你家舅爷，鲶是外公外婆」（p121 L27）", "图纸：beat 2 剧情驱动者（安王欲烹→鱼母遁水）"]}, {"id": "role_elder_arbiter", "name": "公证老人", "type": "RoleFigure", "kind": "凡人", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 982, "line_no": 7, "text": "一老人把话讲，"}, "aliases": null, "ref_forms": [{"form": "老人/一老人", "range": "p982-983", "note": "「有一老人来公证」"}], "notes": ["beat 14：提议分河分地（「分河成两道，分地方做两份」，p983 L2-3）", "安王不受分地（p983 L7「安王愤恨不回来，要做灾难给人间」）"]}, {"id": "role_eagle_envoy", "name": "鹰使", "type": "RoleFigure", "kind": "动物角色", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 965, "line_no": 4, "text": "祖王给鹰穿花衣，"}, "aliases": null, "ref_forms": [{"form": "鹰/老鹰", "range": "p965-967", "note": "受遣飞往安王处"}, {"form": "鹰小姐", "range": "p965 L5", "note": "拟人敬称"}], "notes": ["祖王遣使（穿花衣）；与鸦使同行", "p967 安王欲射之，鹰鸦急告「冤仇是祖王造成的」（p967 L7）", "职责：传信请兄归（承父病）"]}, {"id": "role_crow_envoy", "name": "鸦使", "type": "RoleFigure", "kind": "动物角色", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 965, "line_no": 3, "text": "祖王给乌鸦穿黑衣，"}, "aliases": null, "ref_forms": [{"form": "乌鸦", "range": "p965-967", "note": "受遣飞往安王处"}, {"form": "乌鸦小姐", "range": "p965 L6", "note": "拟人敬称"}], "notes": ["p934 L2「像两个乌鸦兄弟」为明喻（起兴），非鸦使出场——已排除", "穿黑衣（与鹰花衣对称）"]}, {"id": "role_tiger", "name": "老虎", "type": "RoleFigure", "kind": "动物角色", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 975, "line_no": 5, "text": "叫老虎掘洞，"}, "aliases": null, "ref_forms": [{"form": "老虎", "range": "p975", "note": "被叫掘洞→拒助"}, {"form": "虎", "range": "p964 L6", "note": "「虎能黑夜行」（答话人提及）"}], "notes": ["拒助边（反向边）承载者：p975 L6「老虎不掘洞」", "设计 §2.3 要求动物角色边必须保留"]}, {"id": "role_bear", "name": "老熊", "type": "RoleFigure", "kind": "动物角色", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 975, "line_no": 6, "text": "叫老熊运土，"}, "aliases": null, "ref_forms": [{"form": "老熊", "range": "p975", "note": "被叫运土→拒助"}, {"form": "熊", "range": "p964 L5", "note": "「熊能走黑路」（答话人提及）"}], "notes": ["拒助边承载者：p975 L7「老熊不运土」"]}, {"id": "role_adviser", "name": "答话人", "type": "RoleFigure", "kind": "凡人", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 964, "line_no": 3, "text": "有个人来说，"}, "aliases": null, "ref_forms": [{"form": "有个人/有一人", "range": "p964", "note": "答祖王之问"}], "notes": ["微观角色：向祖王荐使（「熊能走黑路，虎能黑夜行，乌鸦能低飞」，p964 L5-7）", "设计未列，S1 全检补入（角色类型查全）"]}, {"id": "role_woman_reporter", "name": "报信妇女", "type": "RoleFigure", "kind": "凡人", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 978, "line_no": 6, "text": "有一妇女来报告，"}, "aliases": null, "ref_forms": [{"form": "有一妇女", "range": "p978", "note": "来报告/回来讲"}], "notes": ["报告祖王庆贺事（串联 beat 11→12 的关键角色）"]}, {"id": "role_commoners", "name": "百姓", "type": "RoleFigure", "kind": "凡人（集体）", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 975, "line_no": 3, "text": "叫全寨人都去，"}, "aliases": null, "ref_forms": [{"form": "全寨人", "range": "p975", "note": "被叫掘井"}, {"form": "多人/众人", "range": "p978 L5", "note": "被邀庆贺（「邀请多人来庆贺」）"}, {"form": "天下人/地上人", "range": "p960 L1-2", "note": "降灾波及对象"}, {"form": "别人/人家", "range": "p960-961", "note": "瘟疫灾及「别人婴儿」"}, {"form": "百姓/平民", "range": "p985", "note": "「百姓才安宁／百姓平民皆欢喜」"}], "notes": ["降灾对象两条边之「百姓」端（设计 §2.4(3)c：与祖王分开建边）", "与祖王受灾的区分见 p980-982（祖王家）vs p960-961（天下人）"]}, {"id": "role_bumo", "name": "布摩（宗教祭司）", "type": "RoleFigure", "kind": "凡人（集体·演唱者）", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 904, "line_no": 2, "text": "《安王和祖王》大多数是由宗教祭司布摩唱述，它有别于其他"}, "aliases": null, "ref_forms": null, "notes": ["full 层散文导读（p904 L2-9）：三种演唱场合（非正常死亡/小孩生天花/疾病缠身）＋正月扫寨、祭田坝＋铜锣节奏", "Ritual 功能边的本子内锚点（比外部文献更硬）"]}, {"id": "deity_dragon_king", "name": "龙王", "type": "Deity", "kind": "神灵", "source": "版本复述层（非古歌本事实层）", "in_graph": false, "first_seen": {"page": 121, "line_no": 38, "text": "安王在洞里向龙王外公外婆呼救，得以脱险。"}, "aliases": null, "ref_forms": null, "notes": ["古歌本事实层救助者＝鱼女（p977-978），龙王仅见复述层——事实层以古歌本为准，入谱标 source", "与 role_fish_grandparents 的「外公外婆」身份在复述层合并"]}, {"id": "deity_thunder_god", "name": "雷公", "type": "Deity", "kind": "神灵", "source": "外部版本（仅外部，语料内 0 命中）", "in_graph": false, "first_seen": {"external": true, "source": "云村寨《论王》存档：「坠井得龙王、雷公救助」；望谟长版梗概同"}, "aliases": null, "ref_forms": null, "notes": ["古歌本 p977 L7「一声炸雷响」为天象描写，非人格神——已区分，不误建边", "字面（雷）与人格神（雷公）的区别登记在案", "first_seen 为外部指针（非语料指针）——雷公不见于大观复述段（p121-122 仅言龙王），也不见于古歌本；语料内「一声炸雷响」（p977 L8）为天象描写，已区分"]}, {"id": "place_riverside", "name": "河边", "type": "Place", "kind": "人间（水界边界）", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 904, "line_no": 10, "text": "盘果跨过河，"}, "aliases": null, "ref_forms": null, "notes": ["事件密集地（设计 §2.2）"]}, {"id": "place_well_cave", "name": "井（洞）", "type": "Place", "kind": "人间（地下）", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 972, "line_no": 8, "text": "不挖井养父，"}, "aliases": null, "ref_forms": ["井", "洞", "巧简井（专名，p973 L3）", "三步楼様（p976-977 下井步阶）"], "notes": ["beat 10-11 核心场景；与 place_sky 构成「地下→天上」垂直叙事轴"]}, {"id": "place_sky", "name": "天上", "type": "Place", "kind": "天上", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 979, "line_no": 6, "text": "安王气愤飞上天，"}, "aliases": null, "ref_forms": null, "notes": ["安王最终居所；纳贡体系的空间基础（天上/人间）"]}, {"id": "place_xuanwang_riverhead", "name": "玄王住的河头", "type": "Place", "kind": "人间（远方）", "source": "in_corpus", "in_graph": false, "first_seen": {"page": 959, "line_no": 6, "text": "我逃到玄王住的河头上，"}, "aliases": null, "ref_forms": null, "notes": ["与 person_xuanwang 绑定（安王威胁语中的避难/施灾方向）"]}, {"id": "place_vietnam", "name": "越南（南方）", "type": "Place", "kind": "人间（远方）", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 962, "line_no": 2, "text": "安王　逃去 越南做头目（意译层作「逃到南方找出路」p962 L3）"}, "aliases": null, "ref_forms": null, "notes": ["直译层确据（设计方案所记「越南（p962）」核实属实，出自直译层）", "外部（非遗官方页）作「交趾（Jiaozhi）」说——背景属性", "成名行动：越南当头目＋召集兵马（beat 8）"]}, {"id": "place_fields", "name": "田坝（田/坝）", "type": "Place", "kind": "人间", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 938, "line_no": 7, "text": "兄弟俩才去种田。"}, "aliases": null, "ref_forms": null, "notes": ["beat 5（送饭不均）与 beat 11（获救落点）共用场景"]}, {"id": "place_dragon_palace", "name": "龙宫", "type": "Place", "kind": "水界", "source": "外部版本", "in_graph": false, "first_seen": {"page": 913, "line_no": 6, "text": "（古歌本只作「消失无踪影」；龙宫为望谟长版记载）"}, "aliases": null, "ref_forms": null, "notes": ["古歌本事实层无龙宫场景——仅外部版本，入谱标 source"]}, {"id": "object_seal", "name": "大印", "type": "Object", "kind": "权力信物", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 923, "line_no": 3, "text": "需要龙去管大印，"}, "aliases": null, "ref_forms": [{"form": "大印", "range": "p923, p947 L4", "note": "「杀死安王夺大印」"}, {"form": "王印", "range": "p951 L3", "note": "「我杀安王夺王印」"}, {"form": "锦鸡图印/百灵鸟图的大印", "range": "p923 L4-6", "note": "印面鸟纹（图腾佐证）"}], "notes": ["beat 6-7 争夺物；鸟纹印（锦鸡/百灵鸟）与鸟灾斗法形成呼应"]}, {"id": "object_fish_token", "name": "鱼鳞鱼鳍（定情信物）", "type": "Object", "kind": "婚约信物", "source": "in_corpus", "in_graph": false, "first_seen": {"page": 905, "line_no": 2, "text": "他称赞鱼鳞红，"}, "aliases": null, "ref_forms": null, "notes": ["版本差异：古歌本「鱼鳞红/鱼鳍淡红」vs 大观「紫鳞绿鳍」（p121 L27）"]}, {"id": "object_grain", "name": "稻谷（粳稻）", "type": "Object", "kind": "生计资料", "source": "in_corpus", "in_graph": false, "first_seen": {"page": 952, "line_no": 6, "text": "把你的稻谷啄光，"}, "aliases": null, "ref_forms": null, "notes": ["修正登记：设计方案原列「谷种」（p948-961 斗法物）——通读核实为稻谷/粳稻（成熟庄稼），已更名"]}, {"id": "object_net", "name": "网", "type": "Object", "kind": "斗法破解物", "source": "in_corpus", "in_graph": false, "first_seen": {"page": 954, "line_no": 1, "text": "拔马尾来编织网，"}, "aliases": null, "ref_forms": null, "notes": ["马尾织网（材料细节）；斗法「施灾-破解」对之一"]}, {"id": "object_torch", "name": "火炬（苦竹火炬）", "type": "Object", "kind": "斗法破解物", "source": "in_corpus", "in_graph": false, "first_seen": {"page": 956, "line_no": 3, "text": "有一百五十把苦竹火炬，"}, "aliases": null, "ref_forms": null, "notes": ["斗法「施灾-破解」对之一（黑暗 vs 火炬）"]}, {"id": "object_tribute", "name": "贡品（租子）", "type": "Object", "kind": "贡赋", "source": "in_corpus", "in_graph": false, "first_seen": {"page": 984, "line_no": 2, "text": "每年要许多人抬财物，"}, "aliases": null, "ref_forms": null, "notes": ["beat 14 结局物；与「分河分地」并列的两种结局方案（地不受、贡要纳）"]}, {"id": "object_suzhe_catfish", "name": "苏者鲶", "type": "Object", "kind": "父索之物", "source": "in_corpus", "in_graph": false, "first_seen": {"page": 973, "line_no": 4, "text": "人家去找苏者鲶②，"}, "aliases": null, "ref_forms": null, "notes": ["原书注②，注释内容待核（OCR未截）；与「巧简井水」并列的父所求之物", "S2 建边时作为「父索之物」object 端"]}, {"id": "piece_awzw", "name": "安王与祖王（古歌本）", "type": "Piece", "kind": "歌篇", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 904, "line_no": 10, "text": "（篇目 p904-985，82 页）"}, "aliases": null, "ref_forms": null, "notes": ["S2 建 version_of/sameAs 边的起点节点"]}, {"id": "bearer_liaojiayuan", "name": "廖家园（唱述人）", "type": "Bearer", "kind": "演唱者", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 985, "line_no": 9, "text": "唱述人：望谟县城关镇上院廖家园（已人工复核，行首残片已剔除）"}, "aliases": null, "ref_forms": null, "notes": ["「上院」为寨名；人名/地名解读待人工确认（S1 遗留项）", "籍贯望谟与「古歌本＝望谟系简本」互证"]}, {"id": "bearer_huangyiren", "name": "黄义仁（搜集整理）", "type": "Bearer", "kind": "搜集整理者", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 985, "line_no": 10, "text": "搜集整理：黄义仁（已人工复核）"}, "aliases": null, "ref_forms": null, "notes": ["搜集时间 1962年4月（p985 L11）", "云村寨《摩经》篇互证：黄义仁翻译整理望谟本约560余行"]}, {"id": "region_spread", "name": "流传地（罗甸·望谟·册亨一带）", "type": "Region", "kind": "现实地域", "source": "in_corpus", "in_graph": true, "first_seen": {"page": 985, "line_no": 8, "text": "流传地区：罗甸、望谟、册享一带（原文如此；「册享」按人工复核订正为「册亨」）"}, "aliases": null, "ref_forms": null, "notes": ["篇尾元数据为事实层指针；外部扩展作背景属性"]}, {"id": "ritual_redeem_head", "name": "赎头（超度凶死者仪式）", "type": "Ritual", "kind": "仪式", "source": "in_corpus（本子内证据）+外部佐证", "in_graph": true, "first_seen": {"page": 904, "line_no": 2, "text": "《安王和祖王》大多数是由宗教祭司布摩唱述，它有别于其他"}, "aliases": null, "ref_forms": null, "notes": ["术语「赎头」出自外部文献；本子内 p904 导读描述其仪式场合（不出现该词）——双层证据登记"]}, {"id": "doc_guxiejing", "name": "古谢经（专书）", "type": "ExternalDoc", "kind": "外部版本件", "source": "external_placeholder", "in_graph": true, "first_seen": null, "aliases": null, "ref_forms": null, "notes": ["demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"]}, {"id": "person_anwang_mbd", "name": "安王（《穆播董》）", "type": "ExternalFigure", "kind": "外部版本件", "source": "external_placeholder", "in_graph": true, "first_seen": null, "aliases": null, "ref_forms": null, "notes": ["demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"]}, {"id": "person_panguo_mbd", "name": "盘果（《穆播董》）", "type": "ExternalFigure", "kind": "外部版本件", "source": "external_placeholder", "in_graph": true, "first_seen": null, "aliases": null, "ref_forms": null, "notes": ["demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"]}, {"id": "person_zuwang_mbd", "name": "祖王（《穆播董》）", "type": "ExternalFigure", "kind": "外部版本件", "source": "external_placeholder", "in_graph": true, "first_seen": null, "aliases": null, "ref_forms": null, "notes": ["demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"]}, {"id": "piece_ceheng1500", "name": "册亨版（1988）", "type": "ExternalPiece", "kind": "外部版本件", "source": "external_placeholder", "in_graph": true, "first_seen": null, "aliases": null, "ref_forms": null, "notes": ["demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"]}, {"id": "piece_daguan_mubodong", "name": "大观《穆播董》", "type": "ExternalPiece", "kind": "外部版本件", "source": "external_placeholder", "in_graph": true, "first_seen": null, "aliases": null, "ref_forms": null, "notes": ["demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"]}, {"id": "piece_hanwen_suowen", "name": "罕温/索温异名本", "type": "ExternalPiece", "kind": "外部版本件", "source": "external_placeholder", "in_graph": true, "first_seen": null, "aliases": null, "ref_forms": null, "notes": ["demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"]}, {"id": "piece_holm_hanvueng", "name": "Holm英译本Hanvueng", "type": "ExternalPiece", "kind": "外部版本件", "source": "external_placeholder", "in_graph": true, "first_seen": null, "aliases": null, "ref_forms": null, "notes": ["demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"]}, {"id": "piece_nakui1600", "name": "望谟纳魁村本", "type": "ExternalPiece", "kind": "外部版本件", "source": "external_placeholder", "in_graph": true, "first_seen": null, "aliases": null, "ref_forms": null, "notes": ["demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"]}, {"id": "piece_wangmo1994", "name": "望谟1994整理本", "type": "ExternalPiece", "kind": "外部版本件", "source": "external_placeholder", "in_graph": true, "first_seen": null, "aliases": null, "ref_forms": null, "notes": ["demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"]}, {"id": "piece_zhenfeng_bahao", "name": "贞丰岜浩《告王》", "type": "ExternalPiece", "kind": "外部版本件", "source": "external_placeholder", "in_graph": true, "first_seen": null, "aliases": null, "ref_forms": null, "notes": ["demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"]}], "edges": [{"id": "awzw-R001", "source": "person_panguo", "target": "person_yunv", "relation": "人异类婚", "layer": "fact", "symmetric": true, "beat_no": 1, "note": "河畔相遇—夜来成婚（beat 1）", "evidence": [{"page": 906, "line_no": 2, "quote": "鱼吹笛子来匆匆", "line_text": "鱼吹笛子来匆匆，"}, {"page": 908, "line_no": 4, "quote": "我就前来做情人", "line_text": "我就前来做情人，"}, {"page": 909, "line_no": 8, "quote": "住了一年整", "line_text": "住了一年整，"}]}, {"id": "awzw-R002", "source": "person_panguo", "target": "person_anwang", "relation": "父子", "layer": "fact", "symmetric": false, "beat_no": 2, "note": "鱼女生安王（p910 身孕→生于 beat 2 首句段）", "evidence": [{"page": 910, "line_no": 4, "quote": "于是生下了安王", "line_text": "于是生下了安王。"}]}, {"id": "awzw-R003", "source": "person_yunv", "target": "person_anwang", "relation": "母子", "layer": "fact", "symmetric": false, "beat_no": 2, "note": null, "evidence": [{"page": 910, "line_no": 1, "quote": "有了身孕", "line_text": "就有了身孕"}, {"page": 912, "line_no": 3, "quote": "安王母亲急忙说", "line_text": "安王母亲急忙说，"}]}, {"id": "awzw-R004", "source": "person_panguo", "target": "role_stepmother", "relation": "婚配", "layer": "fact", "symmetric": true, "beat_no": 3, "note": "两商人两度说媒后盘果娶寡妇（beat 3）", "evidence": [{"page": 924, "line_no": 5, "quote": "请你去守家", "line_text": "请你去守家，"}, {"page": 932, "line_no": 5, "quote": "于是才依从媒人", "line_text": "于是才依从媒人。"}]}, {"id": "awzw-R005", "source": "person_panguo", "target": "person_zuwang", "relation": "父子", "layer": "fact", "symmetric": false, "beat_no": 3, "note": "父系由婚配段语境推定：盘果娶妇→妇生祖王；朝向与其他「父子」边统一为父→子（设计 §2.3：盘果—[父]→祖王）", "evidence": [{"page": 933, "line_no": 5, "quote": "于是生下祖王", "line_text": "于是生下祖王。"}]}, {"id": "awzw-R006", "source": "role_stepmother", "target": "person_zuwang", "relation": "母子", "layer": "fact", "symmetric": false, "beat_no": 3, "note": null, "evidence": [{"page": 933, "line_no": 2, "quote": "妇女就怀孕", "line_text": "妇女就怀孕，"}, {"page": 933, "line_no": 5, "quote": "于是生下祖王", "line_text": "于是生下祖王。"}]}, {"id": "awzw-R007", "source": "person_anwang", "target": "person_zuwang", "relation": "异母兄弟", "layer": "fact", "symmetric": true, "beat_no": 4, "note": "两兄弟（父同母异：鱼女 vs 后母）", "evidence": [{"page": 934, "line_no": 6, "quote": "安王祖王两兄弟", "line_text": "安王祖王两兄弟，"}]}, {"id": "awzw-R008", "source": "role_stepmother", "target": "person_anwang", "relation": "继母子", "layer": "fact", "symmetric": false, "beat_no": 5, "note": "「后母」「继母」直接称谓安王", "evidence": [{"page": 938, "line_no": 4, "quote": "安王听从后母话", "line_text": " 安王听从后母话，"}, {"page": 938, "line_no": 5, "quote": "接受继母的叮咛", "line_text": "接受继母的叮咛。"}]}, {"id": "awzw-R009", "source": "role_fish_grandparents", "target": "person_anwang", "relation": "外祖孙", "layer": "fact", "symmetric": true, "beat_no": 2, "note": "鱼族亲缘（图腾链）；外祖父母为鱼化身", "evidence": [{"page": 912, "line_no": 6, "quote": "是你外祖父和外祖母", "line_text": "是你外祖父和外祖母！”"}]}, {"id": "awzw-R010", "source": "person_anwang", "target": "person_zuwang", "relation": "争地", "layer": "fact", "symmetric": true, "beat_no": 4, "note": "河边抢鱼→争地结冤（beat 4）", "evidence": [{"page": 934, "line_no": 1, "quote": "去河边抢鱼结冤", "line_text": "去河边抢鱼结冤，"}, {"page": 934, "line_no": 5, "quote": "争夺地方而结仇", "line_text": "争夺地方而结仇，"}]}, {"id": "awzw-R011", "source": "person_zuwang", "target": "object_seal", "relation": "争夺", "layer": "fact", "symmetric": false, "beat_no": 6, "note": "设计 §2.5：大印为争夺物。祖王夺印话语自承", "evidence": [{"page": 951, "line_no": 3, "quote": "我杀安王夺王印", "line_text": "我杀安王夺王印，"}, {"page": 951, "line_no": 4, "quote": "王印由我自己掌", "line_text": "王印由我自己掌，"}]}, {"id": "awzw-R012", "source": "role_stepmother", "target": "person_zuwang", "relation": "唆使", "layer": "fact", "symmetric": false, "beat_no": 6, "note": "唆使原句三连续（p947 L3-8）；含「寨子不散我要它散」", "evidence": [{"page": 947, "line_no": 5, "quote": "我要你杀哥要地方", "line_text": "我要你杀哥要地方，"}, {"page": 947, "line_no": 6, "quote": "杀死安王夺大印", "line_text": "杀死安王夺大印，"}, {"page": 947, "line_no": 7, "quote": "给你自己掌大印", "line_text": "给你自己掌大印，"}]}, {"id": "awzw-R013", "source": "role_stepmother", "target": "person_anwang", "relation": "偏待", "layer": "fact", "symmetric": false, "beat_no": 5, "note": "送饭不均：哥饭置艾枝下/弟饭置枸树；饭菜内容小米东兰菜 vs 白米鱼肉", "evidence": [{"page": 939, "line_no": 5, "quote": "哥的饭在艾枝", "line_text": "“哥的饭在艾枝① 下面，"}, {"page": 939, "line_no": 6, "quote": "你饭在枸树", "line_text": "你饭在枸树②上头。"}]}, {"id": "awzw-R014", "source": "role_stepmother", "target": "person_zuwang", "relation": "厚待", "layer": "fact", "symmetric": false, "beat_no": 5, "note": "", "evidence": [{"page": 939, "line_no": 6, "quote": "你饭在枸树", "line_text": "你饭在枸树②上头。"}, {"page": 942, "line_no": 7, "quote": "我吃白米下鱼肉", "line_text": "“我吃白米下鱼肉，"}]}, {"id": "awzw-R015", "source": "person_zuwang", "target": "role_stepmother", "relation": "告状", "layer": "fact", "symmetric": false, "beat_no": 5, "note": "祖王回家告状致唆使（beat 5→6 因果扣）", "evidence": [{"page": 945, "line_no": 4, "quote": "母亲啊母亲", "line_text": "“母亲啊母亲！"}, {"page": 945, "line_no": 5, "quote": "今早饭不同", "line_text": "今早饭不同，"}, {"page": 945, "line_no": 6, "quote": "菜也不一样", "line_text": "菜也不一样。"}]}, {"id": "awzw-R016", "source": "person_zuwang", "target": "person_anwang", "relation": "加害", "layer": "fact", "symmetric": false, "beat_no": 10, "note": "掘井→填土→庆贺（以为已死）；加害完成度：未遂（鱼母救出）", "evidence": [{"page": 975, "line_no": 2, "quote": "祖王邀安王掘井", "line_text": "祖王邀安王掘井，"}, {"page": 977, "line_no": 5, "quote": "来路封得黑漆漆", "line_text": "来路封得黑漆漆。"}, {"page": 978, "line_no": 5, "quote": "邀请多人来庆贺", "line_text": "邀请多人来庆贺，"}]}, {"id": "awzw-R017", "source": "person_anwang", "target": "person_zuwang", "relation": "降灾", "layer": "fact", "symmetric": false, "beat_no": 13, "note": "降灾对象之一：祖王（设计 §2.4(3)c 要求分两条）", "evidence": [{"page": 980, "line_no": 1, "quote": "成三年大嘴鸟", "line_text": "成三年大嘴鸟，"}, {"page": 980, "line_no": 5, "quote": "又做了三年昏暗", "line_text": "又做了三年昏暗，"}, {"page": 982, "line_no": 5, "quote": "祖王才到处奔跑", "line_text": "祖王才到处奔跑，"}]}, {"id": "awzw-R018", "source": "person_anwang", "target": "role_commoners", "relation": "降灾", "layer": "fact", "symmetric": false, "beat_no": 13, "note": "降灾波及苍生（「别人」「婴儿」「独儿」）——与对祖王边分开", "evidence": [{"page": 980, "line_no": 7, "quote": "别人做什么也不成", "line_text": "别人做什么也不成，"}, {"page": 982, "line_no": 2, "quote": "婴儿才死于天花", "line_text": "婴儿才死于天花，"}]}, {"id": "awzw-R019", "source": "person_anwang", "target": "person_zuwang", "relation": "索贡", "layer": "fact", "symmetric": false, "beat_no": 14, "note": "结局：不受分地、令年年纳贡；敏感表述见 object_tribute.cultural_note", "evidence": [{"page": 984, "line_no": 2, "quote": "每年要许多人抬财物", "line_text": "每年要许多人抬财物，"}, {"page": 984, "line_no": 3, "quote": "年要许多小孩作租子", "line_text": "年要许多小孩作租子。"}, {"page": 985, "line_no": 2, "quote": "祖王听从大哥说", "line_text": "祖王听从大哥说，"}]}, {"id": "awzw-R020", "source": "person_zuwang", "target": "role_eagle_envoy", "relation": "遣使", "layer": "fact", "symmetric": false, "beat_no": 9, "note": "遣使请兄归（beat 9）", "evidence": [{"page": 965, "line_no": 4, "quote": "祖王给鹰穿花衣", "line_text": "祖王给鹰穿花衣，"}, {"page": 965, "line_no": 5, "quote": "请鹰小姐吃饭", "line_text": "请鹰小姐吃饭，"}]}, {"id": "awzw-R021", "source": "person_zuwang", "target": "role_crow_envoy", "relation": "遣使", "layer": "fact", "symmetric": false, "beat_no": 9, "note": null, "evidence": [{"page": 965, "line_no": 3, "quote": "祖王给乌鸦穿黑衣", "line_text": "祖王给乌鸦穿黑衣，"}, {"page": 965, "line_no": 6, "quote": "请乌鸦小姐就賓", "line_text": "请乌鸦小姐就賓。"}]}, {"id": "awzw-R022", "source": "role_eagle_envoy", "target": "person_anwang", "relation": "传信", "layer": "fact", "symmetric": false, "beat_no": 9, "note": "鹰鸦使者传信父病、请兄归", "evidence": [{"page": 967, "line_no": 7, "quote": "冤仇是祖王造成的", "line_text": "冤仇是祖王造成的，"}, {"page": 968, "line_no": 5, "quote": "叫我请你回家去", "line_text": "叫我请你回家去，"}]}, {"id": "awzw-R023", "source": "role_crow_envoy", "target": "person_anwang", "relation": "传信", "layer": "fact", "symmetric": false, "beat_no": 9, "note": "与鹰使对称同行", "evidence": [{"page": 967, "line_no": 7, "quote": "冤仇是祖王造成的", "line_text": "冤仇是祖王造成的，"}, {"page": 968, "line_no": 5, "quote": "叫我请你回家去", "line_text": "叫我请你回家去，"}]}, {"id": "awzw-R024", "source": "role_elder_arbiter", "target": "person_anwang", "relation": "公证分地", "layer": "fact", "symmetric": false, "beat_no": 14, "note": "老人提议分河分地（安王不受）", "evidence": [{"page": 983, "line_no": 1, "quote": "有一老人来公证", "line_text": "有一老人来公证："}, {"page": 983, "line_no": 2, "quote": "分河成两道", "line_text": "“分河成两道，"}, {"page": 983, "line_no": 4, "quote": "请安王回来", "line_text": "请安王回来，"}]}, {"id": "awzw-R025", "source": "role_elder_arbiter", "target": "person_zuwang", "relation": "公证分地", "layer": "fact", "symmetric": false, "beat_no": 14, "note": "提议同样面向祖王", "evidence": [{"page": 983, "line_no": 1, "quote": "有一老人来公证", "line_text": "有一老人来公证："}, {"page": 983, "line_no": 3, "quote": "分地方做两份", "line_text": "分地方做两份，"}]}, {"id": "awzw-R026", "source": "person_yunv", "target": "person_anwang", "relation": "救难", "layer": "fact", "symmetric": false, "beat_no": 11, "note": "雷中救子：炸雷一声，抛出洞外落田坝", "evidence": [{"page": 977, "line_no": 6, "quote": "同安王的母亲是鱼", "line_text": "同安王的母亲是鱼，"}, {"page": 977, "line_no": 7, "quote": "见子遇难她来救", "line_text": "见子遇难她来救。"}, {"page": 978, "line_no": 1, "quote": "安王被抛出洞外", "line_text": "安王被抛出洞外，"}]}, {"id": "awzw-R027", "source": "role_tiger", "target": "person_zuwang", "relation": "拒助", "layer": "fact", "symmetric": false, "beat_no": 10, "note": "反向边（拒为掘井）——设计 §2.3 保留动物角色边", "evidence": [{"page": 975, "line_no": 5, "quote": "叫老虎掘洞", "line_text": "叫老虎掘洞，突"}, {"page": 975, "line_no": 8, "quote": "老虎不掘洞", "line_text": "老虎不掘洞，"}]}, {"id": "awzw-R028", "source": "role_bear", "target": "person_zuwang", "relation": "拒助", "layer": "fact", "symmetric": false, "beat_no": 10, "note": "反向边", "evidence": [{"page": 975, "line_no": 6, "quote": "叫老熊运土", "line_text": "叫老熊运土，"}, {"page": 975, "line_no": 10, "quote": "老熊不运土", "line_text": "老熊不运土。"}]}, {"id": "awzw-R029", "source": "role_merchant_1", "target": "person_panguo", "relation": "说媒", "layer": "fact", "symmetric": false, "beat_no": 3, "note": "第一次说媒失败；S1 待人工项裁定：对称建两条（个体不合并）", "evidence": [{"page": 916, "line_no": 4, "quote": "两个客人开口说", "line_text": "两个客人开口说，"}, {"page": 920, "line_no": 6, "quote": "杀花鸡请媒人", "line_text": "杀花鸡请媒人。”果盘"}, {"page": 926, "line_no": 5, "quote": "我做媒不成功", "line_text": "我做媒不成功，"}]}, {"id": "awzw-R030", "source": "role_merchant_2", "target": "person_panguo", "relation": "说媒", "layer": "fact", "symmetric": false, "beat_no": 3, "note": "第二次说媒成功（促成婚配边）", "evidence": [{"page": 928, "line_no": 3, "quote": "你们重新走", "line_text": "你们重新走，"}, {"page": 928, "line_no": 6, "quote": "俩媒人去说第二次", "line_text": "俩媒人去说第二次，对"}, {"page": 932, "line_no": 5, "quote": "于是才依从媒人", "line_text": "于是才依从媒人。"}]}, {"id": "awzw-R031", "source": "role_adviser", "target": "person_zuwang", "relation": "荐使", "layer": "fact", "symmetric": false, "beat_no": 9, "note": "答话人荐使（谁家能走夜路）", "evidence": [{"page": 964, "line_no": 5, "quote": "熊能走黑路", "line_text": "“熊能走黑路，"}, {"page": 964, "line_no": 6, "quote": "虎能黑夜行", "line_text": "虎能黑夜行，"}, {"page": 964, "line_no": 7, "quote": "乌鸦能低飞", "line_text": "乌鸦能低飞，"}]}, {"id": "awzw-R032", "source": "bearer_liaojiayuan", "target": "piece_awzw", "relation": "演唱", "layer": "fact", "symmetric": false, "beat_no": null, "note": "篇尾元数据（人工复核已剔除行首残片；「上院」寨名解读待人工）", "evidence": [{"page": 985, "line_no": 9, "quote": "唱述人：望谟县城关镇上院廖家园", "line_text": "悲所平下　唱述人：望谟县城关镇上院廖家园"}]}, {"id": "awzw-R033", "source": "bearer_huangyiren", "target": "piece_awzw", "relation": "整理", "layer": "fact", "symmetric": false, "beat_no": null, "note": "篇尾元数据（人工复核）", "evidence": [{"page": 985, "line_no": 10, "quote": "搜集整理：黄义仁", "line_text": "搜集整理：黄义仁"}, {"page": 985, "line_no": 11, "quote": "搜集时间：1962年4月", "line_text": "搜集时间：1962年4月"}]}, {"id": "awzw-R034", "source": "piece_awzw", "target": "region_spread", "relation": "流传于", "layer": "fact", "symmetric": false, "beat_no": null, "note": "原文「册享」订正为「册亨」（人工复核）", "evidence": [{"page": 985, "line_no": 8, "quote": "流传地区：罗甸、望谟、册享一带", "line_text": "流传地区：罗甸、望谟、册享一带"}]}, {"id": "awzw-R035", "source": "piece_awzw", "target": "ritual_redeem_head", "relation": "仪式功能", "layer": "fact", "symmetric": false, "beat_no": null, "note": "本子内功能边锚点（full层 p904 散文导读：三种场合演唱）", "evidence": [{"page": 904, "line_no": 2, "quote": "《安王和祖王》大多数是由宗教祭司布摩唱述", "line_text": "《安王和祖王》大多数是由宗教祭司布摩唱述，它有别于其他"}]}, {"id": "awzw-R036", "source": "role_bumo", "target": "ritual_redeem_head", "relation": "主持", "layer": "fact", "symmetric": false, "beat_no": null, "note": "布摩演唱该经（非正常死亡超度、天花、疾病缠身；扫寨/祭田坝）", "evidence": [{"page": 904, "line_no": 2, "quote": "由宗教祭司布摩唱述", "line_text": "《安王和祖王》大多数是由宗教祭司布摩唱述，它有别于其他"}]}, {"id": "awzw-R037", "source": "ritual_redeem_head", "target": "doc_guxiejing", "relation": "属体系", "layer": "cross_doc", "symmetric": false, "beat_no": null, "note": "跨册边：殡亡经体系≡古谢经专书（v1.4-ocr）。外部佐证：云村寨《摩经》篇——安王与祖王属殡亡经体系；殡亡=砍牛=古谢方言链", "evidence": []}, {"id": "awzw-R038", "source": "person_anwang", "target": "person_anwang_mbd", "relation": "sameAs", "layer": "cross_doc", "symmetric": false, "beat_no": null, "note": "安王@古歌 ≡ 安王@穆播董（大观 P121 L26-31 复述）", "evidence": []}, {"id": "awzw-R039", "source": "person_zuwang", "target": "person_zuwang_mbd", "relation": "sameAs", "layer": "cross_doc", "symmetric": false, "beat_no": null, "note": "祖王@古歌 ≡ 祖王@穆播董", "evidence": []}, {"id": "awzw-R040", "source": "person_panguo", "target": "person_panguo_mbd", "relation": "sameAs", "layer": "cross_doc", "symmetric": false, "beat_no": null, "note": "盘果@古歌 ≡ 盘果@穆播董（P121 L26「盘果王」）", "evidence": []}, {"id": "awzw-R041", "source": "piece_daguan_mubodong", "target": "piece_awzw", "relation": "parallel_piece", "layer": "cross_doc", "symmetric": false, "beat_no": null, "note": "章节级对照；逐节拍对齐见 events.jsonl.parallel_edges", "evidence": []}, {"id": "awzw-R042", "source": "piece_awzw", "target": "piece_wangmo1994", "relation": "version_of", "layer": "version", "symmetric": false, "beat_no": null, "note": "望谟 1994（望谟系最长整理本 1700 行）（源：bibliography.json；外部版本不取事实证据）", "evidence": []}, {"id": "awzw-R043", "source": "piece_awzw", "target": "piece_holm_hanvueng", "relation": "version_of", "layer": "version", "symmetric": false, "beat_no": null, "note": "Holm 英译本（原题即安王与祖王）（源：bibliography.json；外部版本不取事实证据）", "evidence": []}, {"id": "awzw-R044", "source": "piece_awzw", "target": "piece_hanwen_suowen", "relation": "version_of", "layer": "version", "symmetric": false, "beat_no": null, "note": "罕温与索温异名本（N1 裁定后可建）（源：bibliography.json；外部版本不取事实证据）", "evidence": []}, {"id": "awzw-R045", "source": "piece_awzw", "target": "piece_nakui1600", "relation": "version_of", "layer": "version", "symmetric": false, "beat_no": null, "note": "望谟纳魁村本 1600 行（源：bibliography.json；外部版本不取事实证据）", "evidence": []}, {"id": "awzw-R046", "source": "piece_awzw", "target": "piece_ceheng1500", "relation": "version_of", "layer": "version", "symmetric": false, "beat_no": null, "note": "册亨版 1500 行（1988）（源：bibliography.json；外部版本不取事实证据）", "evidence": []}, {"id": "awzw-R047", "source": "piece_awzw", "target": "piece_zhenfeng_bahao", "relation": "version_of", "layer": "version", "symmetric": false, "beat_no": null, "note": "贞丰岜浩《告王》300 行（赎头经）（源：bibliography.json；外部版本不取事实证据）", "evidence": []}], "events": [{"event_id": "event_b01", "beat_no": 1, "name": "盘果河畔赞鱼；鱼女夜来吹笛弹弦成婚", "pages": "p904-909", "agents": ["person_panguo", "person_yunv"], "located": ["place_riverside"], "evidence": [{"page": 904, "line_no": 10, "quote": "盘果跨过河", "line_text": "盘果跨过河，"}, {"page": 905, "line_no": 2, "quote": "他称赞鱼鳞红", "line_text": "他称赞鱼鳞红，"}, {"page": 907, "line_no": 2, "quote": "鱼女急忙说", "line_text": "鱼女急忙说，"}, {"page": 908, "line_no": 4, "quote": "我就前来做情人", "line_text": "我就前来做情人，"}, {"page": 910, "line_no": 1, "quote": "就有了身孕", "line_text": "就有了身孕"}], "parallel": {"doc_id": "buyi_daguan", "canon_version": "v1.1-ocr", "page": 121, "line_span": [26, 26], "quote_in_span": "盘果遇见鲶鱼变的姑娘，两人结夫妻"}, "note": null}, {"event_id": "event_b02", "beat_no": 2, "name": "安王出生；13岁捕鱼欲烹外祖父母，鱼母遁水，成孤儿", "pages": "p910-913", "agents": ["person_anwang", "person_yunv"], "patients": ["role_fish_grandparents"], "located": ["place_riverside"], "evidence": [{"page": 910, "line_no": 4, "quote": "于是生下了安王", "line_text": "于是生下了安王。"}, {"page": 912, "line_no": 6, "quote": "是你外祖父和外祖母", "line_text": "是你外祖父和外祖母！”"}, {"page": 913, "line_no": 4, "quote": "先杀一条来吃吧", "line_text": "先杀一条来吃吧！”"}, {"page": 913, "line_no": 6, "quote": "消失无踪影", "line_text": "消失无踪影。"}, {"page": 913, "line_no": 7, "quote": "王十三岁成孤儿", "line_text": "王十三岁成孤儿，"}], "parallel": {"doc_id": "buyi_daguan", "canon_version": "v1.1-ocr", "page": 121, "line_span": [26, 28], "quote_in_span": "打得一条紫鳞绿鳍的大鲶鱼回家欲煮食，其母阻止说"}, "note": "版本差异：观作「紫鳞绿鳍」（古歌本鱼鳞红/鳍淡红）"}, {"event_id": "event_b03", "beat_no": 3, "name": "两商人两度说媒，盘果娶寡妇（含 p914 引段）", "pages": "p914-933", "agents": ["role_merchant_1", "role_merchant_2", "person_panguo", "role_stepmother"], "located": ["place_riverside"], "evidence": [{"page": 914, "line_no": 1, "quote": "盘果二十五岁成鳏夫", "line_text": "盘果二十五岁成鳏夫，"}, {"page": 915, "line_no": 8, "quote": "巧遇两个生意人", "line_text": "巧遇两个生意人，"}, {"page": 920, "line_no": 6, "quote": "杀花鸡请媒人", "line_text": "杀花鸡请媒人。”果盘"}, {"page": 926, "line_no": 5, "quote": "我做媒不成功", "line_text": "我做媒不成功，"}, {"page": 928, "line_no": 3, "quote": "你们重新走", "line_text": "你们重新走，"}, {"page": 932, "line_no": 5, "quote": "于是才依从媒人", "line_text": "于是才依从媒人。"}], "parallel": {"doc_id": "buyi_daguan", "canon_version": "v1.1-ocr", "page": 121, "line_span": [28, 29], "quote_in_span": "又娶了后妻，后妻生子祖王"}, "note": "S1 裁定：p914 引段归此拍"}, {"event_id": "event_b04", "beat_no": 4, "name": "兄弟河边抢鱼争地，结冤", "pages": "p933-934", "agents": ["person_anwang", "person_zuwang"], "located": ["place_riverside"], "evidence": [{"page": 934, "line_no": 1, "quote": "去河边抢鱼结冤", "line_text": "去河边抢鱼结冤，"}, {"page": 934, "line_no": 5, "quote": "争夺地方而结仇", "line_text": "争夺地方而结仇，"}, {"page": 934, "line_no": 6, "quote": "安王祖王两兄弟", "line_text": "安王祖王两兄弟，"}], "parallel": {"doc_id": "buyi_daguan", "canon_version": "v1.1-ocr", "page": 121, "line_span": [29, 29], "quote_in_span": "两兄弟到田里干活"}, "note": null}, {"event_id": "event_b05", "beat_no": 5, "name": "后母送饭不均（艾枝下/枸树上），祖王告状", "pages": "p935-946", "agents": ["role_stepmother", "person_anwang", "person_zuwang"], "located": ["place_fields"], "evidence": [{"page": 935, "line_no": 1, "quote": "安王去河边痛哭", "line_text": "安王去河边痛哭，"}, {"page": 939, "line_no": 6, "quote": "你饭在枸树", "line_text": "你饭在枸树②上头。"}, {"page": 942, "line_no": 2, "quote": "我吃小米下东兰菜", "line_text": "我吃小米下东兰菜，"}, {"page": 942, "line_no": 7, "quote": "我吃白米下鱼肉", "line_text": "“我吃白米下鱼肉，"}, {"page": 945, "line_no": 5, "quote": "今早饭不同", "line_text": "今早饭不同，"}], "parallel": {"doc_id": "buyi_daguan", "canon_version": "v1.1-ocr", "page": 121, "line_span": [29, 31], "quote_in_span": "后母厚祖王而薄安王"}, "note": "观作「安王包的是东南菜下小米饭」——饭色佐证一致"}, {"event_id": "event_b06", "beat_no": 6, "name": "后母唆祖王杀哥夺大印", "pages": "p946-948", "agents": ["role_stepmother"], "patients": ["person_zuwang", "person_anwang"], "evidence": [{"page": 947, "line_no": 3, "quote": "寨子不散我要它散", "line_text": "寨子不散我要它散，"}, {"page": 947, "line_no": 5, "quote": "我要你杀哥要地方", "line_text": "我要你杀哥要地方，"}, {"page": 947, "line_no": 6, "quote": "杀死安王夺大印", "line_text": "杀死安王夺大印，"}], "parallel": {"doc_id": "buyi_daguan", "canon_version": "v1.1-ocr", "page": 121, "line_span": [32, 33], "quote_in_span": "其母早就眼红安王的地位，极力唆使儿子弑兄夺权"}, "note": null}, {"event_id": "event_b07", "beat_no": 7, "name": "兄弟斗法：安王互施灾 vs 祖王破解（鸟灾/黑暗/瘟疫对）", "pages": "p948-961", "agents": ["person_anwang", "person_zuwang"], "evidence": [{"page": 952, "line_no": 6, "quote": "把你的稻谷啄光", "line_text": "把你的稻谷啄光，"}, {"page": 954, "line_no": 1, "quote": "拔马尾来编织网", "line_text": "拔马尾来编织网，"}, {"page": 955, "line_no": 3, "quote": "去做三年黑暗", "line_text": "去做三年黑暗，"}, {"page": 956, "line_no": 3, "quote": "有一百五十把苦竹火炬", "line_text": "有一百五十把苦竹火炬，"}, {"page": 957, "line_no": 4, "quote": "我做三年红痢疾", "line_text": "“我做三年红痢疾，"}, {"page": 959, "line_no": 8, "quote": "去做三年天花来村子", "line_text": "去做三年天花来村子，"}, {"page": 961, "line_no": 3, "quote": "用鬼火去杀", "line_text": "用鬼火去杀，"}, {"page": 961, "line_no": 4, "quote": "用雷火去烧", "line_text": "用雷火去烧，"}], "parallel": {"doc_id": "buyi_daguan", "canon_version": "v1.1-ocr", "page": 121, "line_span": [34, 35], "quote_in_span": "暗地从背后用箭射杀安王"}, "note": "设计 §2.4(3)b：按「施灾-破解」事件对建模（3 对：鸟灾/黑暗/瘟疫 vs 网/火炬/鬼火雷火），不按字面抽人物伤害。版本差异：复述段此处为「箭射杀」非斗法"}, {"event_id": "event_b08", "beat_no": 8, "name": "安王逃往南方（直译：越南当头），召兵；父气病", "pages": "p962", "agents": ["person_anwang", "person_panguo"], "located": ["place_vietnam"], "evidence": [{"page": 962, "line_no": 3, "quote": "逃到南方找出路", "line_text": "逃到南方找出路，"}, {"page": 962, "line_no": 4, "quote": "召集兵马来攻打", "line_text": "召集兵马来攻打。"}, {"page": 962, "line_no": 7, "quote": "父亲气愤生大病", "line_text": "父亲气愤生大病，"}], "parallel": {"doc_id": "buyi_daguan", "canon_version": "v1.1-ocr", "page": 121, "line_span": [35, 36], "quote_in_span": "病重，招安王回家"}, "note": "直译层：越南当头（p962 L2）"}, {"event_id": "event_b09", "beat_no": 9, "name": "祖王遣鹰、鸦使请兄归", "pages": "p963-969", "agents": ["person_zuwang", "role_eagle_envoy", "role_crow_envoy", "role_adviser"], "patients": ["person_anwang"], "evidence": [{"page": 964, "line_no": 5, "quote": "熊能走黑路", "line_text": "“熊能走黑路，"}, {"page": 965, "line_no": 4, "quote": "祖王给鹰穿花衣", "line_text": "祖王给鹰穿花衣，"}, {"page": 965, "line_no": 3, "quote": "祖王给乌鸦穿黑衣", "line_text": "祖王给乌鸦穿黑衣，"}, {"page": 966, "line_no": 7, "quote": "这鹰像是外地鹰", "line_text": "“这鹰像是外地鹰，"}, {"page": 967, "line_no": 7, "quote": "冤仇是祖王造成的", "line_text": "冤仇是祖王造成的，"}, {"page": 968, "line_no": 5, "quote": "叫我请你回家去", "line_text": "叫我请你回家去，"}], "parallel": {"doc_id": "buyi_daguan", "canon_version": "v1.1-ocr", "page": 122, "line_span": [4, 4], "quote_in_span": "忙请乌鹊作使者"}, "note": "版本差异：复述段使者后置于降灾段（时序与古歌本不同）"}, {"event_id": "event_b10", "beat_no": 10, "name": "父索巧简井水与苏者鲶；兄弟掘井，祖王填土害兄", "pages": "p969-977", "agents": ["person_panguo", "person_anwang", "person_zuwang"], "patients": ["role_tiger", "role_bear", "role_commoners"], "located": ["place_well_cave"], "evidence": [{"page": 972, "line_no": 8, "quote": "不挖井养父", "line_text": "不挖井养父，"}, {"page": 973, "line_no": 3, "quote": "人家去找巧简井", "line_text": "人家去找巧简井①，"}, {"page": 973, "line_no": 4, "quote": "人家去找苏者鲶", "line_text": "人家去找苏者鲶②，"}, {"page": 975, "line_no": 2, "quote": "祖王邀安王掘井", "line_text": "祖王邀安王掘井，"}, {"page": 975, "line_no": 8, "quote": "老虎不掘洞", "line_text": "老虎不掘洞，"}, {"page": 976, "line_no": 1, "quote": "大哥就去挖", "line_text": "大哥就去挖，"}, {"page": 977, "line_no": 5, "quote": "来路封得黑漆漆", "line_text": "来路封得黑漆漆。"}], "parallel": {"doc_id": "buyi_daguan", "canon_version": "v1.1-ocr", "page": 121, "line_span": [36, 38], "quote_in_span": "推下石头泥土把洞填了"}, "note": null}, {"event_id": "event_b11", "beat_no": 11, "name": "鱼母雷中救子，抛出洞外", "pages": "p977-978", "agents": ["person_yunv"], "patients": ["person_anwang"], "located": ["place_well_cave", "place_fields"], "evidence": [{"page": 977, "line_no": 6, "quote": "同安王的母亲是鱼", "line_text": "同安王的母亲是鱼，"}, {"page": 977, "line_no": 7, "quote": "见子遇难她来救", "line_text": "见子遇难她来救。"}, {"page": 977, "line_no": 8, "quote": "一声炸雷响", "line_text": "一声炸雷响，"}, {"page": 978, "line_no": 1, "quote": "安王被抛出洞外", "line_text": "安王被抛出洞外，"}, {"page": 978, "line_no": 2, "quote": "落到田中间", "line_text": "落到田中间，"}], "parallel": {"doc_id": "buyi_daguan", "canon_version": "v1.1-ocr", "page": 121, "line_span": [37, 39], "quote_in_span": "向龙王外公外婆呼"}, "note": "版本差异：复述段救助者=龙王（古歌本=鱼母）"}, {"event_id": "event_b12", "beat_no": 12, "name": "兄弟相打，安王飞上天", "pages": "p978-979", "agents": ["person_anwang", "person_zuwang", "role_woman_reporter"], "located": ["place_fields", "place_sky"], "evidence": [{"page": 978, "line_no": 5, "quote": "邀请多人来庆贺", "line_text": "邀请多人来庆贺，"}, {"page": 978, "line_no": 6, "quote": "有一妇女来报告", "line_text": "有一妇女来报告，"}, {"page": 979, "line_no": 3, "quote": "用身子相撞", "line_text": "用身子相撞，"}, {"page": 979, "line_no": 6, "quote": "安王气愤飞上天", "line_text": " 安王气愤飞上天，"}], "parallel": {"doc_id": "buyi_daguan", "canon_version": "v1.1-ocr", "page": 121, "line_span": [39, 39], "quote_in_span": "发誓要报仇"}, "note": null}, {"event_id": "event_b13", "beat_no": 13, "name": "安王降鸟灾、黑暗、瘟疫；祖王遍寻大哥", "pages": "p980-982", "agents": ["person_anwang"], "patients": ["person_zuwang", "role_commoners"], "located": ["place_sky"], "evidence": [{"page": 980, "line_no": 1, "quote": "成三年大嘴鸟", "line_text": "成三年大嘴鸟，"}, {"page": 980, "line_no": 5, "quote": "又做了三年昏暗", "line_text": "又做了三年昏暗，"}, {"page": 981, "line_no": 2, "quote": "又做三年红痢疾", "line_text": "又做三年红痢疾，"}, {"page": 982, "line_no": 2, "quote": "婴儿才死于天花", "line_text": "婴儿才死于天花，"}, {"page": 982, "line_no": 5, "quote": "祖王才到处奔跑", "line_text": "祖王才到处奔跑，"}], "parallel": {"doc_id": "buyi_daguan", "canon_version": "v1.1-ocr", "page": 122, "line_span": [2, 4], "quote_in_span": "安王果然上天降下各种灾难"}, "note": "降灾双边（祖王/百姓）已在 R2 单独建边"}, {"event_id": "event_b14", "beat_no": 14, "name": "老人公证分河分地；安王不受，令年年纳贡，百姓方安", "pages": "p982-985", "agents": ["role_elder_arbiter", "person_anwang", "person_zuwang"], "patients": ["role_commoners"], "located": ["place_sky"], "evidence": [{"page": 983, "line_no": 1, "quote": "有一老人来公证", "line_text": "有一老人来公证："}, {"page": 983, "line_no": 2, "quote": "分河成两道", "line_text": "“分河成两道，"}, {"page": 983, "line_no": 7, "quote": "安王愤恨不回来", "line_text": "安王愤恨不回来，"}, {"page": 984, "line_no": 2, "quote": "每年要许多人抬财物", "line_text": "每年要许多人抬财物，"}, {"page": 984, "line_no": 3, "quote": "年要许多小孩作租子", "line_text": "年要许多小孩作租子。"}, {"page": 985, "line_no": 1, "quote": "百姓才安宁", "line_text": "百姓才安宁。"}], "parallel": {"doc_id": "buyi_daguan", "canon_version": "v1.1-ocr", "page": 122, "line_span": [4, 12], "quote_in_span": "下方每年要进贡"}, "note": "版本差异（结局）：复述段和解分治+交租进贡；古歌本安王不受分地纯令纳贡；p984 小孩作租子—忠实转写"}, {"event_id": "event_b07a", "beat_no": 7, "name": "斗法对1：鸟灾 vs 拔马尾织网", "sub_of": "event_b07", "threat_desc": "安王矢言化作三年大嘴鸟啄尽稻谷（p952）", "counter_desc": "祖王拔马尾织网张树（p954）", "evidence_threat": [{"page": 952, "line_no": 6, "quote": "把你的稻谷啄光", "line_text": "把你的稻谷啄光，"}, {"page": 953, "line_no": 2, "quote": "让你腹空如秋蝉", "line_text": "让你腹空如秋蝉，"}], "evidence_counter": [{"page": 954, "line_no": 1, "quote": "拔马尾来编织网", "line_text": "拔马尾来编织网，"}, {"page": 954, "line_no": 2, "quote": "拿网张开在树上", "line_text": "拿网张开在树上，"}], "note": null}, {"event_id": "event_b07b", "beat_no": 7, "name": "斗法对2：黑暗长夜 vs 苦竹火炬", "sub_of": "event_b07", "threat_desc": "安王作三年黑暗七年昏暗（p955）", "counter_desc": "祖王一百五十把苦竹火炬加三缸野猪油（p956）", "evidence_threat": [{"page": 955, "line_no": 3, "quote": "去做三年黑暗", "line_text": "去做三年黑暗，"}, {"page": 955, "line_no": 6, "quote": "你才找大哥", "line_text": "你才找大哥。”"}], "evidence_counter": [{"page": 956, "line_no": 3, "quote": "有一百五十把苦竹火炬", "line_text": "有一百五十把苦竹火炬，"}, {"page": 956, "line_no": 4, "quote": "有三缸野猪油", "line_text": "有三缸野猪油，"}], "note": null}, {"event_id": "event_b07c", "beat_no": 7, "name": "斗法对3：痢疾天花 vs 鬼火雷火", "sub_of": "event_b07", "threat_desc": "安王施红痢疾/疟疾/天花/麻疹（p957-960，威胁语中安王誓逃到玄王住的河头）", "counter_desc": "祖王藏孩童于密室并用鬼火雷火杀烧（p958-961）", "evidence_threat": [{"page": 957, "line_no": 4, "quote": "我做三年红痢疾", "line_text": "“我做三年红痢疾，"}, {"page": 959, "line_no": 8, "quote": "去做三年天花来村子", "line_text": "去做三年天花来村子，"}, {"page": 960, "line_no": 3, "quote": "使别人婴儿死于牛痘", "line_text": "使别人婴儿死于牛痘，"}], "evidence_counter": [{"page": 958, "line_no": 6, "quote": "小孩我放在中间", "line_text": "“小孩我放在中间，"}, {"page": 961, "line_no": 3, "quote": "用鬼火去杀", "line_text": "用鬼火去杀，"}, {"page": 961, "line_no": 4, "quote": "用雷火去烧", "line_text": "用雷火去烧，"}], "note": null}], "attributes": [{"entity_id": "person_anwang", "attr": "身份", "value": "长子（盘果×鱼女所出）", "note": null, "evidence": [{"page": 910, "line_no": 4, "quote": "于是生下了安王", "line_text": "于是生下了安王。"}]}, {"entity_id": "person_anwang", "attr": "kind", "value": "半神", "note": "判定证据链：鱼女生→母雷中救→上天（设计 §3-S2-R1 要求引链）", "evidence": [{"page": 910, "line_no": 4, "quote": "于是生下了安王", "line_text": "于是生下了安王。"}, {"page": 977, "line_no": 6, "quote": "同安王的母亲是鱼", "line_text": "同安王的母亲是鱼，"}, {"page": 978, "line_no": 1, "quote": "安王被抛出洞外", "line_text": "安王被抛出洞外，"}, {"page": 979, "line_no": 6, "quote": "安王气愤飞上天", "line_text": " 安王气愤飞上天，"}]}, {"entity_id": "person_anwang", "attr": "居所", "value": "人间（童年河边）→ 天上（结局）", "note": null, "evidence": [{"page": 979, "line_no": 6, "quote": "安王气愤飞上天", "line_text": " 安王气愤飞上天，"}, {"page": 984, "line_no": 4, "quote": "大哥在天上", "line_text": "大哥在天上，"}]}, {"entity_id": "person_anwang", "attr": "结局", "value": "于天上掌上方、不受分地、令祖王年年纳贡（含小孩作租子——忠实转写）", "note": null, "evidence": [{"page": 984, "line_no": 3, "quote": "年要许多小孩作租子", "line_text": "年要许多小孩作租子。"}, {"page": 985, "line_no": 2, "quote": "祖王听从大哥说", "line_text": "祖王听从大哥说，"}]}, {"entity_id": "person_zuwang", "attr": "身份", "value": "次子（盘果×后母所出）", "note": null, "evidence": [{"page": 933, "line_no": 5, "quote": "于是生下祖王", "line_text": "于是生下祖王。"}, {"page": 945, "line_no": 4, "quote": "母亲啊母亲", "line_text": "“母亲啊母亲！"}]}, {"entity_id": "person_zuwang", "attr": "kind", "value": "凡人", "note": "无异象证据，凡人", "evidence": [{"page": 933, "line_no": 5, "quote": "于是生下祖王", "line_text": "于是生下祖王。"}]}, {"entity_id": "person_zuwang", "attr": "结局", "value": "听从大哥、掌下方、年年纳贡", "note": null, "evidence": [{"page": 984, "line_no": 5, "quote": "回小弟在人间", "line_text": "回小弟在人间，"}, {"page": 985, "line_no": 2, "quote": "祖王听从大哥说", "line_text": "祖王听从大哥说，"}, {"page": 985, "line_no": 3, "quote": "百姓平民皆欢喜", "line_text": "百姓平民皆欢喜。"}]}, {"entity_id": "person_panguo", "attr": "身份", "value": "渔夫/家长", "note": null, "evidence": [{"page": 904, "line_no": 10, "quote": "盘果跨过河", "line_text": "盘果跨过河，"}, {"page": 905, "line_no": 2, "quote": "他称赞鱼鳞红", "line_text": "他称赞鱼鳞红，"}]}, {"entity_id": "person_panguo", "attr": "kind", "value": "凡人", "note": "无异象证据", "evidence": [{"page": 904, "line_no": 10, "quote": "盘果跨过河", "line_text": "盘果跨过河，"}]}, {"entity_id": "person_panguo", "attr": "居所", "value": "人间·河边草屋", "note": null, "evidence": [{"page": 911, "line_no": 2, "quote": "安王带它回草屋", "line_text": "安王带它回草屋，"}]}, {"entity_id": "person_panguo", "attr": "结局", "value": "气病重（胃病）→ 催安王归（怒愈）", "note": null, "evidence": [{"page": 962, "line_no": 7, "quote": "父亲气愤生大病", "line_text": "父亲气愤生大病，"}, {"page": 963, "line_no": 1, "quote": "令安王返回", "line_text": "令安王返回，"}, {"page": 963, "line_no": 3, "quote": "父病才痊愈", "line_text": "父病才痊愈。塗"}]}, {"entity_id": "person_yunv", "attr": "身份", "value": "鱼女（鱼化身）→ 盘果妻", "note": null, "evidence": [{"page": 906, "line_no": 2, "quote": "鱼吹笛子来匆匆", "line_text": "鱼吹笛子来匆匆，"}, {"page": 908, "line_no": 4, "quote": "我就前来做情人", "line_text": "我就前来做情人，"}, {"page": 909, "line_no": 2, "quote": "拿鳞给你作衣裳", "line_text": "拿鳞给你作衣裳，"}]}, {"entity_id": "person_yunv", "attr": "kind", "value": "半神", "note": "夜来化人成婚—遁水—雷中救子，三处异能链", "evidence": [{"page": 906, "line_no": 2, "quote": "鱼吹笛子来匆匆", "line_text": "鱼吹笛子来匆匆，"}, {"page": 913, "line_no": 6, "quote": "消失无踪影", "line_text": "消失无踪影。"}, {"page": 977, "line_no": 6, "quote": "同安王的母亲是鱼", "line_text": "同安王的母亲是鱼，"}, {"page": 977, "line_no": 8, "quote": "一声炸雷响", "line_text": "一声炸雷响，"}]}, {"entity_id": "person_yunv", "attr": "结局", "value": "遁水消失（p913）；井难时雷中救子（p977-978）后不复现", "note": null, "evidence": [{"page": 913, "line_no": 6, "quote": "消失无踪影", "line_text": "消失无踪影。"}, {"page": 978, "line_no": 1, "quote": "安王被抛出洞外", "line_text": "安王被抛出洞外，"}]}, {"entity_id": "person_xuanwang", "attr": "居所", "value": "玄王住的河头", "note": null, "evidence": [{"page": 959, "line_no": 6, "quote": "逃到玄王住的河头上", "line_text": "逃到玄王住的河头上，"}]}, {"entity_id": "person_xuanwang", "attr": "kind", "value": "凡人（推测）", "note": "仅一见，不判神性", "evidence": [{"page": 959, "line_no": 6, "quote": "玄王住的河头上", "line_text": "逃到玄王住的河头上，"}]}, {"entity_id": "role_stepmother", "attr": "身份", "value": "寡妇 → 盘果继妻 → 祖王生母", "note": null, "evidence": [{"page": 918, "line_no": 6, "quote": "警见一妇女长得好", "line_text": "警见一妇女长得好，"}, {"page": 925, "line_no": 1, "quote": "我丈夫昨晚才死", "line_text": "我丈夫昨晚才死，"}, {"page": 932, "line_no": 5, "quote": "于是才依从媒人", "line_text": "于是才依从媒人。"}, {"page": 933, "line_no": 5, "quote": "于是生下祖王", "line_text": "于是生下祖王。"}]}, {"entity_id": "role_stepmother", "attr": "结局", "value": "原文未明（唆使后不再出场）", "note": "设计 §6-4：如实登记空值，不补全", "evidence": []}]};</script>
+<script>
+"use strict";
+/* ---------- 基础数据 ---------- */
+const TYPE_META = {
+  Person:        {label:"人物",     color:"#c2410c"},
+  Deity:         {label:"神灵",     color:"#7c3aed"},
+  RoleFigure:    {label:"角色/动物", color:"#ca8a04"},
+  Place:         {label:"地点",     color:"#15803d"},
+  Object:        {label:"器物",     color:"#92400e"},
+  Piece:         {label:"歌篇/版本", color:"#1d4ed8"},
+  Bearer:        {label:"传承者",   color:"#475569"},
+  Region:        {label:"流传地",   color:"#0f766e"},
+  Ritual:        {label:"仪式",     color:"#be185d"},
+  ExternalPiece: {label:"外部版本件", color:"#9ca3af"},
+  ExternalFigure:{label:"外部版本人物", color:"#9ca3af"},
+  ExternalDoc:   {label:"外部文献",   color:"#9ca3af"},
+};
+const TYPE_ORDER = ["Person","Deity","RoleFigure","Place","Object","Piece","Bearer","Region","Ritual","ExternalPiece","ExternalFigure","ExternalDoc"];
+const LAYER_META = {
+  fact:      {label:"事实层",   color:"#52525b", dash:null},
+  version:   {label:"版本链",   color:"#2563eb", dash:"7 4"},
+  cross_doc: {label:"跨册/平行", color:"#9333ea", dash:"2 4"},
+};
+const esc = s => String(s==null?"":s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const nodeById = new Map(GRAPH.nodes.map(n=>[n.id,n]));
+GRAPH.nodes.forEach(n=>n.deg=0);
+GRAPH.edges.forEach(e=>{const s=nodeById.get(e.source),t=nodeById.get(e.target); if(s)s.deg++; if(t)t.deg++;});
+const attrByEntity = new Map();
+GRAPH.attributes.forEach(a=>{
+  if(!attrByEntity.has(a.entity_id)) attrByEntity.set(a.entity_id,[]);
+  attrByEntity.get(a.entity_id).push(a);
+});
+const eventsByEntity = new Map();
+GRAPH.events.forEach(v=>{
+  const push=(k,role)=>[].concat(v[k]||[]).forEach(id=>{
+    if(!eventsByEntity.has(id)) eventsByEntity.set(id,[]);
+    eventsByEntity.get(id).push({event:v, role});
+  });
+  push("agents","agent"); push("patients","patient"); push("located","located");
+});
+const typeVisible={}, layerVisible={fact:true,version:true,cross_doc:true};
+Object.keys(TYPE_META).forEach(t=>typeVisible[t]=true);
+let edgeLabelsOn = true;
+let selected = null;            // {kind:'node'|'edge', id}
+let searchActive = false;
+
+/* ---------- 统计与图例 ---------- */
+document.getElementById("stats").innerHTML =
+  `<span>节点 ${GRAPH.meta.counts.nodes}</span><span>边 ${GRAPH.meta.counts.edges}</span>`+
+  `<span>事件 ${GRAPH.meta.counts.events}</span><span>属性 ${GRAPH.meta.counts.attributes}</span>`;
+document.getElementById("foot").textContent = GRAPH.meta.footer;
+
+function legendRow(key, meta, count, on, isLine){
+  return `<div class="lg-row ${on?"":"off"}" data-kind="${isLine?"layer":"type"}" data-key="${key}">
+    ${isLine?`<span class="lg-line" style="border-color:${meta.color}"></span>`:`<span class="lg-dot" style="background:${meta.color}"></span>`}
+    ${meta.label}<span class="lg-count">${count}</span></div>`;
+}
+function renderLegend(){
+  const tc={}; GRAPH.nodes.forEach(n=>{tc[n.type]=(tc[n.type]||0)+1;});
+  document.getElementById("type-legend").innerHTML = TYPE_ORDER.filter(t=>tc[t]).map(t=>legendRow(t,TYPE_META[t],tc[t],typeVisible[t],false)).join("");
+  const lc={}; GRAPH.edges.forEach(e=>{lc[e.layer]=(lc[e.layer]||0)+1;});
+  document.getElementById("layer-legend").innerHTML = Object.keys(LAYER_META).filter(l=>lc[l]).map(l=>legendRow(l,LAYER_META[l],lc[l],layerVisible[l],true)).join("");
+}
+renderLegend();
+
+/* ---------- 图谱视图 ---------- */
+const svg = document.getElementById("svg");
+const NS = "http://www.w3.org/2000/svg";
+let W=800, H=600, k=1, tx=0, ty=0;
+const defs = svg.appendChild(document.createElementNS(NS,"defs"));
+Object.entries(LAYER_META).forEach(([lay,m])=>{
+  const mk=document.createElementNS(NS,"marker");
+  mk.setAttribute("id","arr-"+lay); mk.setAttribute("viewBox","0 0 10 10");
+  mk.setAttribute("refX","9"); mk.setAttribute("refY","5"); mk.setAttribute("markerWidth","7"); mk.setAttribute("markerHeight","7");
+  mk.setAttribute("orient","auto-start-reverse");
+  const p=document.createElementNS(NS,"path"); p.setAttribute("d","M0 0 L10 5 L0 10 z"); p.setAttribute("fill",m.color);
+  mk.appendChild(p); defs.appendChild(mk);
+});
+const viewport = document.createElementNS(NS,"g"); svg.appendChild(viewport);
+const edgeG = document.createElementNS(NS,"g"); viewport.appendChild(edgeG);
+const lblG = document.createElementNS(NS,"g"); viewport.appendChild(lblG);
+const nodeG = document.createElementNS(NS,"g"); viewport.appendChild(nodeG);
+
+function nodeR(n){ return n.type==="Person" ? Math.max(13, 7+n.deg*1.1) : Math.min(15, 6+n.deg*1.4); }
+GRAPH.nodes.forEach((n,i)=>{
+  const a=i*2.39996, r=30+30*Math.sqrt(i);
+  n.x=W/2+r*Math.cos(a); n.y=H/2+r*Math.sin(a); n.vx=0; n.vy=0;
+});
+const edgeEls=[], edgeLabelEls=[], nodeEls=new Map();
+const pairCount={};
+GRAPH.edges.forEach(e=>{const key=e.source+"→"+e.target; pairCount[key]=(pairCount[key]||0)+1;});
+const pairSeen={};
+
+GRAPH.edges.forEach(e=>{
+  const m=LAYER_META[e.layer];
+  const g=document.createElementNS(NS,"g"); g.setAttribute("class","edge");
+  const line=document.createElementNS(NS,"path");
+  line.setAttribute("fill","none"); line.setAttribute("stroke",m.color); line.setAttribute("stroke-width","1.6");
+  if(m.dash) line.setAttribute("stroke-dasharray",m.dash);
+  if(!e.symmetric) line.setAttribute("marker-end",`url(#arr-${e.layer})`);
+  const hit=document.createElementNS(NS,"path");
+  hit.setAttribute("class","edge-hit"); hit.setAttribute("fill","none");
+  hit.addEventListener("click",ev=>{ev.stopPropagation(); selectEdge(e.id);});
+  const lbl=document.createElementNS(NS,"text");
+  lbl.setAttribute("class","edge-label"); lbl.textContent=e.relation;
+  lbl.addEventListener("click",ev=>{ev.stopPropagation(); selectEdge(e.id);});
+  g.appendChild(line); g.appendChild(hit);
+  const idx=(pairSeen[e.source+"→"+e.target]=(pairSeen[e.source+"→"+e.target]||0));
+  e._curve = pairCount[e.source+"→"+e.target]>1 ? (idx%2===0?1:-1)*(Math.floor(idx/2)+1)*22 : 0;
+  pairSeen[e.source+"→"+e.target]++;
+  edgeG.appendChild(g); edgeEls.push({e,g,line,hit});
+  lblG.appendChild(lbl); edgeLabelEls.push({e,lbl});
+});
+
+GRAPH.nodes.forEach(n=>{
+  const g=document.createElementNS(NS,"g"); g.setAttribute("class","node"+(n.source==="external_placeholder"?" ext":""));
+  const c=document.createElementNS(NS,"circle");
+  c.setAttribute("r",nodeR(n)); c.setAttribute("fill",TYPE_META[n.type]?TYPE_META[n.type].color:"#9ca3af");
+  c.setAttribute("stroke","#fffdf8"); c.setAttribute("stroke-width","1.5");
+  const t=document.createElementNS(NS,"text"); t.setAttribute("dy", nodeR(n)+13); t.textContent=n.name;
+  g.appendChild(c); g.appendChild(t);
+  if(n.type==="Person"){
+    const tip=document.createElementNS(NS,"title"); tip.textContent="点击进入实体页"; g.appendChild(tip);
+  }
+  g.addEventListener("pointerdown",ev=>startNodeDrag(ev,n));
+  g.addEventListener("click",ev=>{ev.stopPropagation(); selectNode(n.id);});
+  nodeG.appendChild(g); nodeEls.set(n.id,{g,c,t});
+});
+
+function applyTransform(){ viewport.setAttribute("transform",`translate(${tx},${ty}) scale(${k})`); }
+function svgPoint(ev){ const r=svg.getBoundingClientRect(); return {x:ev.clientX-r.left, y:ev.clientY-r.top}; }
+function worldPoint(ev){ const p=svgPoint(ev); return {x:(p.x-tx)/k, y:(p.y-ty)/k}; }
+
+svg.addEventListener("wheel",ev=>{
+  ev.preventDefault();
+  const f=ev.deltaY<0?1.12:1/1.12, p=svgPoint(ev);
+  tx=p.x-(p.x-tx)*f; ty=p.y-(p.y-ty)*f; k*=f; applyTransform();
+},{passive:false});
+let pan=null;
+svg.addEventListener("pointerdown",ev=>{
+  if(ev.target===svg||ev.target===viewport||ev.target===edgeG||ev.target===nodeG){
+    pan={sx:ev.clientX, sy:ev.clientY, tx0:tx, ty0:ty}; svg.classList.add("panning"); svg.setPointerCapture(ev.pointerId);
+  }
+});
+svg.addEventListener("pointermove",ev=>{
+  if(pan){ tx=pan.tx0+ev.clientX-pan.sx; ty=pan.ty0+ev.clientY-pan.sy; applyTransform(); }
+});
+svg.addEventListener("pointerup",()=>{ if(pan){pan=null; svg.classList.remove("panning");} });
+svg.addEventListener("click",ev=>{
+  if(ev.target===svg||ev.target===viewport||ev.target===edgeG||ev.target===nodeG) clearSelection();
+});
+
+let dragNode=null;
+function startNodeDrag(ev,n){
+  ev.stopPropagation();
+  dragNode={n, sx:ev.clientX, sy:ev.clientY, moved:false, px:n.x, py:n.y};
+  svg.setPointerCapture(ev.pointerId);
+  const move=me=>{
+    if(!dragNode) return;
+    const dx=me.clientX-dragNode.sx, dy=me.clientY-dragNode.sy;
+    if(Math.hypot(dx,dy)>4) dragNode.moved=true;
+    const w=worldPoint(me);
+    n.x=w.x; n.y=w.y; n.vx=0; n.vy=0;
+    alpha=Math.max(alpha,0.35);
+  };
+  const up=me=>{
+    window.removeEventListener("pointermove",move); window.removeEventListener("pointerup",up);
+    const wasClick=!dragNode.moved; dragNode=null;
+    if(wasClick) selectNode(n.id);
+  };
+  window.addEventListener("pointermove",move); window.addEventListener("pointerup",up);
+}
+
+/* 力导引布局：能量衰减但不冷透，保持常显微动 */
+let alpha=1;
+function tick(){
+  alpha=Math.max(alpha*0.995,0.018);
+  const A=alpha;
+  const ns=GRAPH.nodes.filter(n=>!n.hidden);
+  for(let i=0;i<ns.length;i++)for(let j=i+1;j<ns.length;j++){
+    const a=ns[i],b=ns[j];
+    let dx=b.x-a.x, dy=b.y-a.y, d2=dx*dx+dy*dy; if(d2<1)d2=1;
+    const d=Math.sqrt(d2), f=2400/d2*A, fx=dx/d*f, fy=dy/d*f;
+    a.vx-=fx; a.vy-=fy; b.vx+=fx; b.vy+=fy;
+  }
+  GRAPH.edges.forEach(e=>{
+    if(e.hidden) return;
+    const a=nodeById.get(e.source), b=nodeById.get(e.target);
+    if(!a||!b||a.hidden||b.hidden) return;
+    const dx=b.x-a.x, dy=b.y-a.y, d=Math.hypot(dx,dy)||1;
+    const rest=(a.source==="external_placeholder"||b.source==="external_placeholder")?128:92;
+    const f=(d-rest)*0.012*A, fx=dx/d*f, fy=dy/d*f;
+    a.vx+=fx; a.vy+=fy; b.vx-=fx; b.vy-=fy;
+  });
+  ns.forEach(n=>{
+    n.vx+=(W/2-n.x)*0.0022*A; n.vy+=(H/2-n.y)*0.0022*A;
+    n.vx*=0.86; n.vy*=0.86; n.x+=n.vx; n.y+=n.vy;
+  });
+  renderGraph();
+  requestAnimationFrame(tick);
+}
+function renderGraph(){
+  edgeEls.forEach(({e,line,hit})=>{
+    const s=nodeById.get(e.source), t=nodeById.get(e.target);
+    if(!s||!t) return;
+    const dx=t.x-s.x, dy=t.y-s.y, d=Math.hypot(dx,dy)||1;
+    let x1=s.x+dx/d*(nodeR(s)+3), y1=s.y+dy/d*(nodeR(s)+3);
+    let x2=t.x-dx/d*(nodeR(t)+(e.symmetric?3:8)), y2=t.y-dy/d*(nodeR(t)+(e.symmetric?3:8));
+    let dPath=`M${x1} ${y1} L${x2} ${y2}`;
+    let mx=(x1+x2)/2, my=(y1+y2)/2;
+    if(e._curve){
+      const nx=-dy/d, ny=dx/d, off=e._curve;
+      const cx1=x1+nx*off, cy1=y1+ny*off, cx2=x2+nx*off, cy2=y2+ny*off;
+      dPath=`M${x1} ${y1} Q${(cx1+cx2)/2} ${(cy1+cy2)/2} ${x2} ${y2}`;
+      mx=(x1+2*(cx1+cx2)/2+x2)/4; my=(y1+2*(cy1+cy2)/2+y2)/4;
+    }
+    line.setAttribute("d",dPath); hit.setAttribute("d",dPath);
+    e._lsign = e._curve ? Math.sign(e._curve) : (edgeEls.length % 2 === 0 ? 1 : -1);
+    e._nx=-dy/d; e._ny=dx/d;
+    e._mx=mx; e._my=my;
+  });
+  edgeLabelEls.forEach(({e,lbl})=>{
+    if(!edgeLabelsOn || e.hidden){ lbl.style.display="none"; return; }
+    lbl.style.display="";
+    lbl.setAttribute("x",e._mx + e._nx*9*e._lsign);
+    lbl.setAttribute("y",e._my + e._ny*9*e._lsign - 4);
+  });
+  GRAPH.nodes.forEach(n=>{
+    const el=nodeEls.get(n.id); if(!el) return;
+    el.g.setAttribute("transform",`translate(${n.x},${n.y})`);
+  });
+}
+
+/* 高亮/筛选 */
+function visibleEdges(){ return GRAPH.edges.filter(e=>layerVisible[e.layer] && typeVisible[nodeById.get(e.source)?.type] && typeVisible[nodeById.get(e.target)?.type]); }
+function refreshVisibility(){
+  GRAPH.nodes.forEach(n=>{ n.hidden = !typeVisible[n.type]; });
+  GRAPH.edges.forEach(e=>{
+    const s=nodeById.get(e.source), t=nodeById.get(e.target);
+    e.hidden = !layerVisible[e.layer] || !s || !t || s.hidden || t.hidden;
+  });
+  edgeEls.forEach(({e,g})=>g.style.display=e.hidden?"none":"");
+  edgeLabelEls.forEach(({e,lbl})=>{ if(e.hidden) lbl.style.display="none"; });
+  nodeEls.forEach((el,id)=>{ el.g.style.display=nodeById.get(id).hidden?"none":""; });
+  renderLegend(); applyHighlight();
+}
+function applyHighlight(){
+  let hiNode=null, hiEdge=null;
+  if(selected&&selected.kind==="node") hiNode=selected.id;
+  if(selected&&selected.kind==="edge") hiEdge=selected.id;
+  const focusId = hiNode || (hiEdge? null : null);
+  let neighborIds=null, incidentEdges=null;
+  if(hiNode){
+    neighborIds=new Set([hiNode]); incidentEdges=new Set();
+    GRAPH.edges.forEach(e=>{
+      if(e.hidden) return;
+      if(e.source===hiNode){neighborIds.add(e.target); incidentEdges.add(e.id);}
+      if(e.target===hiNode){neighborIds.add(e.source); incidentEdges.add(e.id);}
+    });
+  }
+  if(hiEdge){ incidentEdges=new Set([hiEdge]); neighborIds=new Set(); const e=GRAPH.edges.find(x=>x.id===hiEdge); if(e){neighborIds.add(e.source); neighborIds.add(e.target);} }
+  nodeEls.forEach((el,id)=>{
+    const n=nodeById.get(id);
+    let dim=false;
+    if(searchActive){ dim=!n._match; }
+    else if(neighborIds){ dim=!neighborIds.has(id); }
+    el.g.classList.toggle("dimmed",dim);
+    el.g.classList.toggle("selected", hiNode===id);
+  });
+  edgeEls.forEach(({e,g})=>{
+    let dim=false;
+    if(searchActive){ dim=!(nodeById.get(e.source)._match&&nodeById.get(e.target)._match); }
+    else if(incidentEdges){ dim=!incidentEdges.has(e.id); }
+    g.classList.toggle("dimmed",dim);
+  });
+  edgeLabelEls.forEach(({e,lbl})=>{
+    let dim=false;
+    if(searchActive){ dim=!(nodeById.get(e.source)._match&&nodeById.get(e.target)._match); }
+    else if(incidentEdges){ dim=!incidentEdges.has(e.id); }
+    lbl.classList.toggle("dimmed",dim);
+  });
+}
+
+/* ---------- 详情面板 ---------- */
+const detailEl=document.getElementById("detail-content");
+const detailPanel=document.getElementById("detail");
+function evQuotes(list){
+  return (list||[]).map(q=>`<div class="quote"><span class="qp">p${q.page}·L${q.line_no}　</span><span class="qt">「${esc(q.line_text||q.quote)}」</span></div>`).join("");
+}
+function chipHtml(id){
+  const n=nodeById.get(id); if(!n) return "";
+  const m=TYPE_META[n.type]||{};
+  return `<span class="chip" data-focus="${id}"><span class="cdot" style="background:${m.color||"#999"}"></span>${esc(n.name)}</span>`;
+}
+function showNodeDetail(id){
+  const n=nodeById.get(id); if(!n) return;
+  const m=TYPE_META[n.type]||{};
+  const attrs=attrByEntity.get(id)||[];
+  const evs=eventsByEntity.get(id)||[];
+  const inc=GRAPH.edges.filter(e=>e.source===id||e.target===id);
+  let html=`<div class="d-title">${esc(n.name)}</div>
+  <div class="d-badges">
+    <span class="d-badge" style="color:${m.color};border-color:${m.color}">${m.label||n.type}</span>
+    ${n.kind?`<span class="d-badge">${esc(n.kind)}</span>`:""}
+    ${n.source==="external_placeholder"?`<span class="d-badge">外部占位节点</span>`:`<span class="d-badge">S1 白名单</span>`}
+    <span class="d-badge">度 ${n.deg}</span>
+  </div>`;
+  if(n.note) html+=`<div class="d-note">${esc(n.note)}</div>`;
+  if(n.first_seen) html+= n.first_seen.page
+    ? `<div class="d-sec">首见</div><div class="quote"><span class="qp">p${n.first_seen.page}·L${n.first_seen.line_no}　</span><span class="qt">「${esc(n.first_seen.text)}」</span></div>`
+    : `<div class="d-sec">首见（外部来源登记）</div><div class="d-note">${esc(n.first_seen.source)}</div>`;
+  if(n.aliases&&Object.keys(n.aliases).length){
+    html+=`<div class="d-sec">别名 / 异写（N1 考订）</div><div class="kv">`+
+      Object.entries(n.aliases).map(([a,i])=>`<b>${esc(a)}</b>（${esc(i.type)}·${esc(i.adjudication)}）`).join("；")+`</div>`;
+  }
+  if(n.ref_forms&&n.ref_forms.length){
+    html+=`<div class="d-sec">称形分布</div><div class="kv">`+
+      n.ref_forms.map(f=>`<b>${esc(f.form)}</b>${f.range?`（${esc(f.range)}）`:""}${f.note?`：${esc(f.note)}`:""}`).join("<br>")+`</div>`;
+  }
+  if(attrs.length){
+    html+=`<div class="d-sec">属性（S2-R1，共 ${attrs.length} 条）</div>`+attrs.map(a=>
+      `<div class="quote"><span class="qt"><b>${esc(a.attr)}</b>：${esc(a.value)}</span>${a.note?`<br><span class="qp">${esc(a.note)}</span>`:""}${a.evidence&&a.evidence[0]?`<br><span class="qp">证据 p${a.evidence[0].page}·L${a.evidence[0].line_no}</span>`:""}</div>`).join("");
+  }
+  if(evs.length){
+    html+=`<div class="d-sec">参与事件（${evs.length}）</div><div class="link-list">`+
+      evs.map(x=>`<span class="lk" data-event="${x.event.event_id}">节拍${x.event.beat_no}${x.event.sub_of?"（子）":""} · ${esc(x.event.name.slice(0,26))}${x.event.name.length>26?"…":""} <span class="rel">[${esc(x.role)}]</span></span>`).join("")+`</div>`;
+  }
+  if(inc.length){
+    html+=`<div class="d-sec">关联边（${inc.length}）</div><div class="link-list">`+
+      inc.map(e=>{
+        const other=e.source===id?e.target:e.source;
+        const dir=e.source===id?"→":"←";
+        return `<span class="lk" data-edge="${e.id}">${esc(nodeById.get(other).name)} <span class="rel">${dir} ${esc(e.relation)} ${e.layer!=="fact"?"["+LAYER_META[e.layer].label+"]":""}</span></span>`;
+      }).join("")+`</div>`;
+  }
+  detailEl.innerHTML=html;
+  bindDetail();
+}
+function showEdgeDetail(id){
+  const e=GRAPH.edges.find(x=>x.id===id); if(!e) return;
+  detailPanel.classList.remove("entity-mode");
+  const s=nodeById.get(e.source), t=nodeById.get(e.target), m=LAYER_META[e.layer];
+  detailEl.innerHTML=`<div class="d-title" style="font-size:14px">边详情</div>
+  <div class="arrow-relation">
+    <span class="end">${esc(s.name)}</span><span class="rel-badge">${esc(e.relation)}</span><span class="end">${esc(t.name)}</span>
+  </div>
+  <div class="d-badges">
+    <span class="d-badge" style="color:${m.color};border-color:${m.color}">${m.label}</span>
+    ${e.beat_no?`<span class="d-badge">节拍 ${e.beat_no}</span>`:""}
+    ${e.symmetric?`<span class="d-badge">对称边</span>`:`<span class="d-badge">有向</span>`}
+    <span class="d-badge">${esc(e.triple_id||e.id)}</span>
+  </div>
+  ${e.note?`<div class="d-note">${esc(e.note)}</div>`:""}
+  ${e.evidence&&e.evidence.length?`<div class="d-sec">语料证据（${e.evidence.length}）</div>${evQuotes(e.evidence)}`:""}
+  <div class="d-sec">节点</div><div class="link-list">
+    <span class="lk" data-focus="${e.source}">▸ ${esc(s.name)} <span class="rel">${TYPE_META[s.type]?TYPE_META[s.type].label:""}</span></span>
+    <span class="lk" data-focus="${e.target}">▸ ${esc(t.name)} <span class="rel">${TYPE_META[t.type]?TYPE_META[t.type].label:""}</span></span>
+  </div>`;
+  bindDetail();
+}
+function showEventDetail(id){
+  const v=GRAPH.events.find(x=>x.event_id===id); if(!v) return;
+  detailPanel.classList.remove("entity-mode");
+  let html=`<div class="d-title" style="font-size:14.5px">${v.sub_of?"〔斗法子事件〕":"〔节拍 "+v.beat_no+"〕"} ${esc(v.name)}</div>
+  <div class="d-badges">
+    <span class="d-badge">${esc(v.pages)}</span>
+    ${v.evidence?`<span class="d-badge">证据 ${v.evidence.length} 条</span>`:""}
+    <span class="d-badge">${esc(v.event_id)}</span>
+  </div>`;
+  if(v.sub_of){
+    html+=`<div class="d-sec">斗法对</div>
+    <div class="d-text"><b>安王施灾</b>：${esc(v.threat_desc||"")}<br><b>祖王破解</b>：${esc(v.counter_desc||"")}</div>`;
+    html+=`<div class="d-sec">施灾证据</div>${evQuotes(v.evidence_threat)}`;
+    html+=`<div class="d-sec">破解证据</div>${evQuotes(v.evidence_counter)}`;
+  }else{
+    const chips=[["agents",v.agents],["patients",v.patients],["located",v.located]].filter(x=>x[1]&&x[1].length);
+    if(chips.length) html+=`<div class="d-sec">参与实体</div><div class="chips">`+
+      chips.map(([role,ids])=>ids.map(i=>chipHtml(i)).join("")).join(`<span class="chip-sub">·</span>`)+`</div>`;
+    if(v.evidence) html+=`<div class="d-sec">语料证据（${v.evidence.length}）</div>${evQuotes(v.evidence)}`;
+  }
+  if(v.parallel) html+=`<div class="d-sec">平行篇章（大观本）</div>
+    <div class="quote"><span class="qp">大观《穆播董》p${v.parallel.page}·L${(v.parallel.line_span||[]).join("-")||""}　</span><span class="qt">「${esc(v.parallel.quote_in_span)}」</span></div>`;
+  if(v.note) html+=`<div class="d-note">${esc(v.note)}</div>`;
+  detailEl.innerHTML=html;
+  bindDetail();
+}
+function bindDetail(){
+  detailEl.querySelectorAll("[data-focus]").forEach(el=>el.addEventListener("click",()=>focusNode(el.dataset.focus)));
+  detailEl.querySelectorAll("[data-edge]").forEach(el=>el.addEventListener("click",()=>selectEdge(el.dataset.edge)));
+  detailEl.querySelectorAll("[data-event]").forEach(el=>el.addEventListener("click",()=>{switchView("timeline"); selectEvent(el.dataset.event,true);}));
+}
+function clearSelection(){
+  selected=null;
+  detailEl.innerHTML=`<div class="d-empty">点击左侧视图中的节点、边或事件卡片<br>此处显示详情与语料证据</div>`;
+  applyHighlight(); markTimelineSelection();
+}
+function selectNode(id, silent){
+  const n=nodeById.get(id); if(!n) return;
+  selected={kind:"node", id};
+  if(n.type==="Person"){
+    lastEntityId=id;
+    buildEntityPage(id);
+    switchView("entity");
+    applyHighlight(); markTimelineSelection();
+    return;
+  }
+  if(currentView!=="graph"&&!silent) switchView("graph");
+  showNodeDetail(id); applyHighlight(); markTimelineSelection();
+}
+function selectEdge(id){
+  selected={kind:"edge", id};
+  showEdgeDetail(id); applyHighlight();
+}
+function selectEvent(id, showDetail){
+  selected={kind:"event", id};
+  if(showDetail!==false) showEventDetail(id);
+  markTimelineSelection();
+}
+function focusNode(id){
+  const n=nodeById.get(id); if(!n) return;
+  typeVisible[n.type]=true; layerVisible.fact=layerVisible.version=layerVisible.cross_doc=true;
+  refreshVisibility();
+  if(n.type==="Person"){ selectNode(id); return; }
+  switchView("graph");
+  tx=W/2-n.x*k; ty=H/2-n.y*k; applyTransform();
+  selectNode(id,true);
+}
+
+/* ---------- 实体页（人物：主区域整页切换） ---------- */
+let lastEntityId=null;
+const IMG_SVG=`<svg width="14" height="14" viewBox="0 0 16 16"><path d="M1.5 3h13v10h-13z" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="5.2" cy="6.8" r="1.3"/><path d="M2.5 12l3.6-3.6 2.8 2.8 2-2 2.6 2.6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>`;
+const VID_SVG=`<svg width="14" height="14" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6.5 5.4l4.4 2.6-4.4 2.6z"/></svg>`;
+function buildEntityPage(id){
+  const n=nodeById.get(id); if(!n) return;
+  const ve=document.getElementById("view-entity");
+  if(ve.dataset.builtFor===id) return;
+  ve.dataset.builtFor=id;
+  const m=TYPE_META[n.type]||{};
+  const attrs=attrByEntity.get(id)||[];
+  const evs=eventsByEntity.get(id)||[];
+  const inc=GRAPH.edges.filter(e=>e.source===id||e.target===id);
+  const mediaSlot=(type,label)=>`<div class="media-slot" data-media-type="${type}" data-media-for="${esc(id)}">
+    <span class="m-ico">${type==="image"?IMG_SVG:VID_SVG}</span><b>${label}</b><span>素材待补（演绎位）</span></div>`;
+  const sec=(t,body)=>body?`<div class="d-sec">${t}</div>${body}`:"";
+  const firstseen = n.first_seen ? (n.first_seen.page
+      ? sec("首见",`<div class="quote"><span class="qp">p${n.first_seen.page}·L${n.first_seen.line_no}　</span><span class="qt">「${esc(n.first_seen.text)}」</span></div>`)
+      : sec("首见（外部来源登记）",`<div class="d-note">${esc(n.first_seen.source)}</div>`)) : "";
+  const aliases = (n.aliases&&Object.keys(n.aliases).length)
+    ? sec("别名 / 异写（N1 考订）",`<div class="kv">`+Object.entries(n.aliases).map(([a,i])=>`<b>${esc(a)}</b>（${esc(i.type)}·${esc(i.adjudication)}）`).join("；")+`</div>`) : "";
+  const forms = (n.ref_forms&&n.ref_forms.length)
+    ? sec("称形分布",`<div class="kv">`+n.ref_forms.map(f=>`<b>${esc(f.form)}</b>${f.range?`（${esc(f.range)}）`:""}${f.note?`：${esc(f.note)}`:""}`).join("<br>")+`</div>`) : "";
+  const attrHtml = attrs.length
+    ? sec(`属性（S2-R1，共 ${attrs.length} 条）`, attrs.map(a=>
+        `<div class="quote"><span class="qt"><b>${esc(a.attr)}</b>：${esc(a.value)}</span>${a.note?`<br><span class="qp">${esc(a.note)}</span>`:""}${a.evidence&&a.evidence[0]?`<br><span class="qp">证据 p${a.evidence[0].page}·L${a.evidence[0].line_no}</span>`:""}</div>`).join("")) : "";
+  const notes = (n.notes&&n.notes.length) ? `<div class="d-note">${n.notes.map(esc).join("<br>")}</div>` : "";
+  const evHtml = evs.length ? sec(`参与事件（${evs.length}）`,`<div class="link-list">`+
+      evs.map(x=>`<span class="lk" data-event="${x.event.event_id}">节拍${x.event.beat_no}${x.event.sub_of?"（子）":""} · ${esc(x.event.name.slice(0,26))}${x.event.name.length>26?"…":""} <span class="rel">[${esc(x.role)}]</span></span>`).join("")+`</div>`) : "";
+  const incHtml = inc.length ? sec(`关联边（${inc.length}）`,`<div class="link-list">`+
+      inc.map(e=>{
+        const other=e.source===id?e.target:e.source;
+        const dir=e.source===id?"→":"←";
+        return `<span class="lk" data-edge="${e.id}">${esc(nodeById.get(other).name)} <span class="rel">${dir} ${esc(e.relation)} ${e.layer!=="fact"?"["+LAYER_META[e.layer].label+"]":""}</span></span>`;
+      }).join("")+`</div>`) : "";
+  ve.innerHTML=`<div class="ep-wrap entity-anim">
+    <div class="ep-top"><button class="back-btn" id="ep-back">← 返回图谱</button><span class="ep-badge">实体页 · 人物</span></div>
+    <div class="media-row ep-media">${mediaSlot("image","图片")}${mediaSlot("video","视频")}</div>
+    <div class="ep-name">${esc(n.name)}</div>
+    <div class="d-badges">
+      <span class="d-badge" style="color:${m.color};border-color:${m.color}">${m.label||n.type}</span>
+      ${n.kind?`<span class="d-badge">${esc(n.kind)}</span>`:""}
+      <span class="d-badge">S1 白名单</span>
+      <span class="d-badge">度 ${n.deg}</span>
+    </div>
+    <div class="ep-grid">
+      <div class="ep-col">${firstseen}${aliases}${forms}${attrHtml}</div>
+      <div class="ep-col">${notes}${evHtml}${incHtml}</div>
+    </div>
+  </div>`;
+  document.getElementById("ep-back").addEventListener("click",()=>{
+    switchView("graph");
+    showNodeDetail(id);
+  });
+  ve.querySelectorAll("[data-focus]").forEach(el=>el.addEventListener("click",()=>focusNode(el.dataset.focus)));
+  ve.querySelectorAll("[data-edge]").forEach(el=>el.addEventListener("click",()=>{ switchView("graph"); selectEdge(el.dataset.edge); }));
+  ve.querySelectorAll("[data-event]").forEach(el=>el.addEventListener("click",()=>{ switchView("timeline"); selectEvent(el.dataset.event,true); }));
+}
+
+/* ---------- 事件视图 ---------- */
+function buildTimeline(){
+  const beats=GRAPH.events.filter(v=>!v.sub_of).sort((a,b)=>a.beat_no-b.beat_no);
+  const subs=GRAPH.events.filter(v=>v.sub_of);
+  const wrap=document.createElement("div"); wrap.className="tl-rail";
+  beats.forEach(v=>{
+    const b=document.createElement("div"); b.className="beat";
+    const chipHtmls=[["agents",v.agents],["patients",v.patients],["located",v.located]]
+      .filter(x=>x[1]&&x[1].length).map(x=>x[1].map(i=>chipHtml(i)).join("")).join(`<span class="chip-sub">·</span>`);
+    let inner=`<div class="beat-no">${v.beat_no}</div>
+      <div class="beat-card" data-event="${v.event_id}">
+        <div class="beat-title">${esc(v.name)}</div>
+        <div class="beat-pages">${esc(v.pages)}　<span class="ev-count">证据 ${v.evidence?v.evidence.length:0} 条</span></div>
+        ${chipHtmls?`<div class="chips">${chipHtmls}</div>`:""}`;
+    const mySubs=subs.filter(s=>s.sub_of===v.event_id).sort((a,b)=>a.event_id.localeCompare(b.event_id));
+    if(mySubs.length){
+      inner+=`<div class="sub-beats">`+mySubs.map(s=>`
+        <div class="sub-card" data-event="${s.event_id}">
+          <div class="sub-title">${esc(s.name)}</div>
+          <div class="sub-pair">灾：${esc(s.threat_desc||"")}<br>解：${esc(s.counter_desc||"")}</div>
+        </div>`).join("")+`</div>`;
+    }
+    inner+=`</div>`;
+    b.innerHTML=inner; wrap.appendChild(b);
+  });
+  const tl=document.getElementById("view-timeline");
+  tl.innerHTML=""; tl.appendChild(wrap);
+  tl.querySelectorAll(".beat-card, .sub-card").forEach(el=>{
+    el.addEventListener("click",ev=>{
+      const focusChip=ev.target.closest("[data-focus]");
+      if(focusChip){ ev.stopPropagation(); focusNode(focusChip.dataset.focus); return; }
+      ev.stopPropagation();
+      selectEvent(el.dataset.event);
+    });
+  });
+}
+function markTimelineSelection(){
+  document.querySelectorAll("#view-timeline .beat-card, #view-timeline .sub-card").forEach(el=>{
+    el.classList.toggle("selected", !!selected && selected.kind==="event" && selected.id===el.dataset.event);
+  });
+}
+
+/* ---------- 实体视图 ---------- */
+function buildEntities(){
+  const wrap=document.createElement("div"); wrap.className="ent-wrap";
+  wrap.innerHTML=`<div class="d-note" style="margin-bottom:14px">S1 白名单 ${GRAPH.meta.counts.whitelist} 实体 + S2 版本层边引用的外部版本件 ${GRAPH.meta.counts.external} 项（demo 占位，正式登记在 S4 落库处理）。「未入边」= 暂无 S2 三元组/事件引用，仅登记待用。</div>`;
+  TYPE_ORDER.forEach(t=>{
+    const list=GRAPH.nodes.filter(n=>n.type===t);
+    if(!list.length) return;
+    const m=TYPE_META[t];
+    const isExt=t.startsWith("External");
+    const g=document.createElement("div"); g.className="ent-group";
+    g.innerHTML=`<h3><span class="lg-dot" style="background:${m.color}"></span>${m.label}（${list.length}）</h3>`;
+    const tbl=document.createElement("table");
+    tbl.innerHTML=`<tr><th>名称</th><th>kind</th><th>别名</th><th>属性</th><th>度</th><th>首见</th></tr>`+
+      list.map(n=>{
+        const ext=n.source==="external_placeholder";
+        const al=n.aliases?Object.keys(n.aliases).length:0;
+        const at=(attrByEntity.get(n.id)||[]).length;
+        return `<tr data-node="${n.id}"><td class="${(!n.in_graph&&!ext)?"dim-name":""}">${esc(n.name)}${
+          ext?`<span class="tag ext">外部占位</span>`:(n.in_graph?`<span class="tag">在图谱</span>`:`<span class="tag off">未入边</span>`)
+        }</td><td>${esc(n.kind||"—")}</td><td>${al||"—"}</td><td>${at||"—"}</td><td>${n.deg||0}</td><td>${
+          n.first_seen?(n.first_seen.page?`p${n.first_seen.page}`:"外部"):(ext?"—":"")}</td></tr>`;
+      }).join("");
+    g.appendChild(tbl); wrap.appendChild(g);
+  });
+  const ev=document.getElementById("view-entities");
+  ev.innerHTML=""; ev.appendChild(wrap);
+  ev.querySelectorAll("tr[data-node]").forEach(tr=>tr.addEventListener("click",()=>selectNode(tr.dataset.node,true)));
+}
+
+/* ---------- 视图切换 / 筛选 / 搜索 ---------- */
+let currentView="graph";
+function switchView(v){
+  currentView=v;
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.dataset.view===v));
+  document.getElementById("view-graph").classList.toggle("hidden",v!=="graph");
+  document.getElementById("view-timeline").classList.toggle("hidden",v!=="timeline");
+  document.getElementById("view-entities").classList.toggle("hidden",v!=="entities");
+  const isEp = v==="entity";
+  document.getElementById("view-entity").classList.toggle("hidden",!isEp);
+  document.getElementById("app").classList.toggle("entity-open",isEp);
+  if(lastEntityId) document.getElementById("tab-entity").style.display="";
+  if(isEp&&lastEntityId) buildEntityPage(lastEntityId);
+  if(v==="timeline"&&!buildTimeline._done){buildTimeline(); buildTimeline._done=true;}
+  if(v==="entities"&&!buildEntities._done){buildEntities(); buildEntities._done=true;}
+  markTimelineSelection();
+}
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>switchView(b.dataset.view)));
+
+document.getElementById("legend").addEventListener("click",ev=>{
+  const row=ev.target.closest(".lg-row"); if(!row) return;
+  if(row.dataset.kind==="type") typeVisible[row.dataset.key]=!typeVisible[row.dataset.key];
+  else layerVisible[row.dataset.key]=!layerVisible[row.dataset.key];
+  refreshVisibility(); wake();
+});
+document.getElementById("toggle-edge-labels").addEventListener("click",()=>{
+  edgeLabelsOn=!edgeLabelsOn;
+  document.getElementById("edge-label-state").textContent=edgeLabelsOn?"开":"关";
+  renderGraph();
+});
+document.getElementById("btn-reset").addEventListener("click",resetAll);
+function resetAll(){
+  Object.keys(typeVisible).forEach(t=>typeVisible[t]=true);
+  Object.keys(layerVisible).forEach(l=>layerVisible[l]=true);
+  edgeLabelsOn=true; document.getElementById("edge-label-state").textContent="开";
+  searchInput.value=""; searchActive=false;
+  GRAPH.nodes.forEach(n=>delete n._match);
+  refreshVisibility(); wake(); clearSelection();
+  k=1; tx=0; ty=0; applyTransform();
+  switchView("graph");
+}
+const searchInput=document.getElementById("search");
+searchInput.addEventListener("input",()=>{
+  const q=searchInput.value.trim();
+  GRAPH.nodes.forEach(n=>delete n._match);
+  searchActive=!!q;
+  if(q){
+    GRAPH.nodes.forEach(n=>{
+      let hit=n.name.includes(q) || (n.aliases&&Object.keys(n.aliases).some(a=>a.includes(q))) || (n.ref_forms&&n.ref_forms.some(f=>f.form.includes(q)));
+      if(hit) n._match=true;
+    });
+  }
+  applyHighlight();
+});
+searchInput.addEventListener("keydown",ev=>{
+  if(ev.key==="Enter"){
+    const first=GRAPH.nodes.find(n=>n._match);
+    if(first) focusNode(first.id);
+  }
+});
+function wake(){ alpha=Math.max(alpha,0.55); }
+
+/* ---------- 启动 ---------- */
+function resize(){
+  const main=document.getElementById("main");
+  W=main.clientWidth; H=main.clientHeight;
+  svg.setAttribute("width",W); svg.setAttribute("height",H);
+  renderGraph();
+}
+window.addEventListener("resize",resize);
+resize();
+refreshVisibility();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>
