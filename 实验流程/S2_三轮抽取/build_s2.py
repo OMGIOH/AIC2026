@@ -106,7 +106,7 @@ t("person_yunv", "母子", "person_anwang", 2, [(910, "有了身孕"), (912, "�
 t("person_panguo", "婚配", "role_stepmother", 3, [(924, "请你去守家"), (932, "于是才依从媒人")], sym=True, note="两商人两度说媒后盘果娶寡妇（beat 3）")
 t("person_panguo", "父子", "role_stepmother and person_zuwang", 0, [])  # 占位防误——见下行修正逻辑
 T.pop()
-t("person_zuwang", "父子", "person_panguo", 3, [(933, "于是生下祖王")], note="父系由婚配段语境推定：盘果娶妇→妇生祖王（「父」身份 p915 起作为幢打生活主人翁；设计 §2.3 明示盘果—[父]→祖王）", relation_extra=True)
+t("person_panguo", "父子", "person_zuwang", 3, [(933, "于是生下祖王")], note="父系由婚配段语境推定：盘果娶妇→妇生祖王；朝向与其他「父子」边统一为父→子（设计 §2.3：盘果—[父]→祖王）", relation_extra=True)
 t("role_stepmother", "母子", "person_zuwang", 3, [(933, "妇女就怀孕"), (933, "于是生下祖王")])
 t("person_anwang", "异母兄弟", "person_zuwang", 4, [(934, "安王祖王两兄弟")], sym=True, note="两兄弟（父同母异：鱼女 vs 后母）")
 t("role_stepmother", "继母子", "person_anwang", 5, [(938, "安王听从后母话"), (938, "接受继母的叮咛")], note="「后母」「继母」直接称谓安王")
