@@ -404,7 +404,7 @@ for tr in trip_out:
 print(f"V1 关系-类型合法矩阵: {len(trip_out)-len(leg_bad)}/{len(trip_out)} 通过", leg_bad or "")
 
 prev = [ee for ee in event_edges if ee["relation"] == "precedes"]
-nums = [int(ee["head"][8:]) for ee in prev]
+nums = [int(ee["head"][len("event_b"):]) for ee in prev]
 mono = all(nums[i] == 1+i for i in range(len(nums)))
 print(f"V2 precedes 无环（线性链 beat 单调）: {mono}（{len(prev)} 条）")
 
