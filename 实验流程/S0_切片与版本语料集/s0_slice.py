@@ -3,7 +3,9 @@
 
 规则代码，仅用 Python 标准库。语料输入为本仓库快照 `布依族资源/`（canon 与源项目一致）。
 
-产出（脚本与产出同位于 实验流程/S0_切片与版本语料集/）：
+产出（脚本与产出同位于 实验流程/S0_切片与版本语料集/）。
+注：复跑为幂等操作，唯一预期差异是 3 个文件（piece_meta.json / qa/tail_p983-989.txt /
+    s0_report.md）的生成日期字段；其余内容比特级一致。
   awzw/awzw_yi_verses.jsonl                    意译层切片（verse 级，十四节拍标注+指针）
   awzw/awzw_full_lines.jsonl                   full 层切片（行级，同页范围，含散文导读）
   awzw/qa/tail_p983-989.txt                    篇尾乱码区逐行查验件（人工核对入口）
@@ -304,7 +306,7 @@ def write_report(checks, beat_stats, covered_beats, zero_pages, no_beat_pages, o
     L = []
     L.append("# S0 切片质检报告 —— 《安王与祖王》")
     L.append("")
-    L.append(f"> 日期：{date.today().isoformat()}｜脚本：`scripts/s0_slice.py`（规则代码，固定 seed 抽验）")
+    L.append(f"> 日期：{date.today().isoformat()}｜脚本：`实验流程/S0_切片与版本语料集/s0_slice.py`（规则代码，固定 seed 抽验）")
     L.append("> 性质声明：本报告为只读检查与切片产出记录，未改动任何语料源文件。")
     L.append("")
     L.append("## 一、总体统计")
