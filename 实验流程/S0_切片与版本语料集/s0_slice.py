@@ -388,9 +388,9 @@ def write_report(checks, beat_stats, covered_beats, zero_pages, no_beat_pages, o
     L.append(f"3. 指针回放失败 {len(bad)} 条（cross_split 类 ±1 字误差属已知待人工项，见 flags 文档）。")
     diff_str = "；".join(f"{k}：实际 {v['actual']} vs 方案 {v['expected']}（Δ{v['delta']:+d}）" for k, v in diff.items())
     L.append(f"4. 大观命中总量与方案所记差异——{diff_str}。")
-    L.append(f"5b. 意译层切片中落在人工复核乱码区的句子已加 tail_garbled 标记"
+    L.append(f"5. 意译层切片中落在人工复核乱码区的句子已加 tail_garbled 标记"
              f"（标记不删除，S2 抽取 prompt 排除）：{n_flagged_garbled} 句。")
-    L.append(f"5. 篇尾元数据已人工复核（{TAIL_REVIEW['date']}，见 {TAIL_REVIEW['file']}）：四项元数据成立，"
+    L.append(f"6. 篇尾元数据已人工复核（{TAIL_REVIEW['date']}，见 {TAIL_REVIEW['file']}）：四项元数据成立，"
              f"「册享」订正为「册亨」；乱码块 A/B 与两处孤立碎片列入排除清单（piece_meta.tail_review）。")
     L.append("")
     L.append("## 六、人工核对入口")
