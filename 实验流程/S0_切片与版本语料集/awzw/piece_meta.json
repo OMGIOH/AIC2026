@@ -120,6 +120,48 @@
   "tail_review": {
     "date": "2026-09-29",
     "file": "qa/tail_boundary_confirmed.md",
+    "exclusion_zones": [
+      {
+        "page": 985,
+        "lines": [
+          4,
+          7
+        ],
+        "label": "乱码块A（不可恢复）"
+      },
+      {
+        "page": 983,
+        "lines": [
+          5,
+          5
+        ],
+        "label": "孤立碎片 2o円"
+      },
+      {
+        "page": 986,
+        "lines": [
+          15,
+          15
+        ],
+        "label": "行尾残尾 墅蕴業變"
+      },
+      {
+        "page": 988,
+        "lines": [
+          6,
+          6
+        ],
+        "label": "乱码块B"
+      },
+      {
+        "page": 988,
+        "lines": [
+          8,
+          19
+        ],
+        "label": "乱码块B"
+      }
+    ],
     "exclusion_lines": [
       "p983 L5",
       "p985 L4-L7（乱码块 A）",
@@ -468,6 +510,7 @@
   "counts": {
     "yi_verses": 540,
     "full_lines": 627,
+    "yi_verses_flagged_garbled": 1,
     "daguan_mubodong_lines": 76,
     "daguan_hit_pages": 28
   },

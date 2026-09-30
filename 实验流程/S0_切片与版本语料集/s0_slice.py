@@ -69,6 +69,13 @@ TAIL_METADATA = {
 TAIL_REVIEW = {
     "date": "2026-09-29",
     "file": "qa/tail_boundary_confirmed.md",
+    "exclusion_zones": [
+        {"page": 985, "lines": [4, 7], "label": "乱码块A（不可恢复）"},
+        {"page": 983, "lines": [5, 5], "label": "孤立碎片 2o円"},
+        {"page": 986, "lines": [15, 15], "label": "行尾残尾 墅蕴業變"},
+        {"page": 988, "lines": [6, 6], "label": "乱码块B"},
+        {"page": 988, "lines": [8, 19], "label": "乱码块B"},
+    ],
     "exclusion_lines": ["p983 L5", "p985 L4-L7（乱码块 A）", "p986 L15 行尾残尾", "p988 L6", "p988 L8-L19（乱码块 B）"],
     "keep_exceptions": ["p988 L7（后记落款 1997年5月20日，夹于乱码块 B 内，保留）"],
     "doc_max_page": 988,
@@ -94,6 +101,14 @@ def beats_for_page(page):
     return nos, len(nos) > 1
 
 
+def garbled_zone(page, line_no):
+    """人工复核划定的乱码区（TAIL_REVIEW.exclusion_zones）；命中返回区标签。"""
+    for z in TAIL_REVIEW["exclusion_zones"]:
+        if z["page"] == page and z["lines"][0] <= line_no <= z["lines"][1]:
+            return z["label"]
+    return None
+
+
 def write_jsonl(path, records):
     with open(path, "w", encoding="utf-8") as f:
         for r in records:
@@ -112,6 +127,9 @@ def slice_yi_verses():
         rec["piece"] = PIECE
         rec["beats"] = beats
         rec["beat_boundary"] = boundary
+        gz = garbled_zone(r["page"], yi.get("line_no") or -1)
+        if gz:
+            rec["tail_garbled"] = gz  # 标记不删除：忠实保留，S2 抽取 prompt 排除
         rec["pointer"] = {
             "doc_id": r["doc_id"],
             "page": r["page"],
@@ -287,6 +305,7 @@ def main():
         "tail_review": TAIL_REVIEW,
         "tail_garbled_flagged": flagged,
         "counts": {"yi_verses": len(yi_records), "full_lines": len(full_records),
+                   "yi_verses_flagged_garbled": sum(1 for r in yi_records if "tail_garbled" in r),
                    "daguan_mubodong_lines": len(daguan_recs), "daguan_hit_pages": hit_pages},
         "pointer_check": {"replayed_ok": ok, "failed": len(bad)},
         "daguan_hits": {"totals": totals, "expected_from_design_doc": DAGUAN_EXPECTED, "diff": diff},
@@ -295,14 +314,15 @@ def main():
     (OUT / "piece_meta.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
 
     write_report(checks, beat_stats, covered_beats, zero_pages, no_beat_pages, ok, bad, samples,
-                 totals, diff, len(yi_records), len(full_records), len(daguan_recs), hit_pages, flagged)
+                 totals, diff, len(yi_records), len(full_records), len(daguan_recs), hit_pages, flagged,
+                 sum(1 for r in yi_records if "tail_garbled" in r))
     print(json.dumps({"yi": len(yi_records), "full": len(full_records), "pointer_ok": ok,
                       "pointer_bad": len(bad), "beats_covered": f"{len(covered_beats)}/14",
                       "zero_pages": zero_pages, "daguan_totals": totals}, ensure_ascii=False, indent=1))
 
 
 def write_report(checks, beat_stats, covered_beats, zero_pages, no_beat_pages, ok, bad, samples,
-                 totals, diff, n_yi, n_full, n_daguan, n_hit_pages, flagged):
+                 totals, diff, n_yi, n_full, n_daguan, n_hit_pages, flagged, n_flagged_garbled):
     L = []
     L.append("# S0 切片质检报告 —— 《安王与祖王》")
     L.append("")
@@ -368,6 +388,8 @@ def write_report(checks, beat_stats, covered_beats, zero_pages, no_beat_pages, o
     L.append(f"3. 指针回放失败 {len(bad)} 条（cross_split 类 ±1 字误差属已知待人工项，见 flags 文档）。")
     diff_str = "；".join(f"{k}：实际 {v['actual']} vs 方案 {v['expected']}（Δ{v['delta']:+d}）" for k, v in diff.items())
     L.append(f"4. 大观命中总量与方案所记差异——{diff_str}。")
+    L.append(f"5b. 意译层切片中落在人工复核乱码区的句子已加 tail_garbled 标记"
+             f"（标记不删除，S2 抽取 prompt 排除）：{n_flagged_garbled} 句。")
     L.append(f"5. 篇尾元数据已人工复核（{TAIL_REVIEW['date']}，见 {TAIL_REVIEW['file']}）：四项元数据成立，"
              f"「册享」订正为「册亨」；乱码块 A/B 与两处孤立碎片列入排除清单（piece_meta.tail_review）。")
     L.append("")
