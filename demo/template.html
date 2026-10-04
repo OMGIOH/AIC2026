@@ -622,8 +622,19 @@ function buildEntityPage(id){
   const attrs=attrByEntity.get(id)||[];
   const evs=eventsByEntity.get(id)||[];
   const inc=GRAPH.edges.filter(e=>e.source===id||e.target===id);
-  const mediaSlot=(type,label)=>`<div class="media-slot" data-media-type="${type}" data-media-for="${esc(id)}">
-    <span class="m-ico">${type==="image"?IMG_SVG:VID_SVG}</span><b>${label}</b><span>素材待补（演绎位）</span></div>`;
+const mediaSlot=(type,label)=>{
+  if(type==="image"){
+    return `<div class="media-slot" data-media-type="image" data-media-for="${esc(id)}" style="padding:0;overflow:hidden;">
+      <img src="images/${esc(id)}.jpg" alt="${esc(label)}" style="width:100%;height:100%;object-fit:cover;border-radius:8px;"
+        onerror="this.parentNode.innerHTML='<span class=\\'m-ico\\'>${IMG_SVG}</span><b>${label}</b><span>素材待补（演绎位）</span>'">
+    </div>`;
+  }
+  return `<div class="media-slot" data-media-type="video" data-media-for="${esc(id)}" style="padding:0;overflow:hidden;">
+    <video src="videos/${esc(id)}.mp4" controls style="width:100%;height:100%;object-fit:cover;border-radius:8px;"
+      onerror="this.parentNode.innerHTML='<span class=\\'m-ico\\'>${VID_SVG}</span><b>${label}</b><span>素材待补（演绎位）</span>'">
+    </video>
+  </div>`;
+};
   const sec=(t,body)=>body?`<div class="d-sec">${t}</div>${body}`:"";
   const firstseen = n.first_seen ? (n.first_seen.page
       ? sec("首见",`<div class="quote"><span class="qp">p${n.first_seen.page}·L${n.first_seen.line_no}　</span><span class="qt">「${esc(n.first_seen.text)}」</span></div>`)
