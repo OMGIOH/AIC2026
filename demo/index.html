@@ -598,12 +598,15 @@ function focusNode(id){ selectNode(id); }
 let lastEntityId=null;
 const IMG_SVG=`<svg width="14" height="14" viewBox="0 0 16 16"><path d="M1.5 3h13v10h-13z" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="5.2" cy="6.8" r="1.3"/><path d="M2.5 12l3.6-3.6 2.8 2.8 2-2 2.6 2.6" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>`;
 const VID_SVG=`<svg width="14" height="14" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6.5 5.4l4.4 2.6-4.4 2.6z"/></svg>`;
+/* 只有这五类设图片/视频位，其余类型不占位 */
+const MEDIA_TYPES={Person:1, Deity:1, RoleFigure:1, Place:1, Object:1};
 function buildEntityPage(id){
   const n=nodeById.get(id); if(!n) return;
   const ve=document.getElementById("view-entity");
   if(ve.dataset.builtFor===id) return;
   ve.dataset.builtFor=id;
   const m=TYPE_META[n.type]||{};
+  const hasMedia=!!MEDIA_TYPES[n.type];
   const attrs=attrByEntity.get(id)||[];
   const evs=eventsByEntity.get(id)||[];
   const inc=GRAPH.edges.filter(e=>e.source===id||e.target===id);
@@ -656,7 +659,7 @@ const mediaSlot=(type,label)=>{
       }).join("")+`</div>`) : "";
   ve.innerHTML=`<div class="ep-wrap">
     <div class="ep-top"><button class="back-btn" id="ep-back">← 返回图谱</button><span class="ep-badge">实体页 · ${m.label||n.type}</span></div>
-    <div class="media-row ep-media" id="ep-media"></div>
+    ${hasMedia?`<div class="media-row ep-media" id="ep-media"></div>`:""}
     <div class="ep-name">${esc(n.name)}</div>
     <div class="d-badges">
       <span class="d-badge" style="color:${m.color};border-color:${m.color}">${m.label||n.type}</span>
@@ -669,7 +672,7 @@ const mediaSlot=(type,label)=>{
       <div class="ep-col">${notes}${evHtml}${incHtml}</div>
     </div>
   </div>`;
-  document.getElementById("ep-media").append(mediaSlot("image","图片"), mediaSlot("video","视频"));
+  if(hasMedia) document.getElementById("ep-media").append(mediaSlot("image","图片"), mediaSlot("video","视频"));
   const wrap=ve.querySelector(".ep-wrap");
   requestAnimationFrame(()=>wrap.classList.add("entity-anim"));
   document.getElementById("ep-back").addEventListener("click",()=>{
