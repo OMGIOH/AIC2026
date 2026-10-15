@@ -19,7 +19,7 @@
   .stats{display:flex; gap:8px; flex-wrap:wrap;}
   .stats span{background:#4a423c; border-radius:4px; padding:3px 9px; font-size:12px; color:#e8e0d0;}
   .hits{padding-left:14px; border-left:1px solid #5a5049; font-size:12px; color:#b3a794; white-space:nowrap;}
-  .hits b{color:#f5f1e8; font-weight:600; font-variant-numeric:tabular-nums;}
+  .hits b{color:#f5f1e8; font-weight:600; font-variant-numeric:tabular-nums; display:inline-block; min-width:2.2em; text-align:right;}
   #search{margin-left:auto; background:#4a423c; border:1px solid #6b5f55; color:#f5f1e8; border-radius:6px;
           padding:5px 10px; font-size:13px; width:230px; outline:none;}
   #search::placeholder{color:#b3a794;}
@@ -146,7 +146,7 @@
   <h1>《安王与祖王》人物知识图谱</h1>
   <span class="badge-demo">初步 DEMO · S0–S2 数据预览</span>
   <div class="stats" id="stats"></div>
-  <span class="hits" id="hits">访问量 <b id="visit-count">67</b></span>
+  <span class="hits" id="hits">访问量 <b id="visit-count"></b></span>
   <input id="search" placeholder="搜索实体：安王 / 祖王 / 鱼女 …" autocomplete="off">
 </header>
 <div id="app">
@@ -836,16 +836,22 @@ requestAnimationFrame(tick);
 /* 访问量：不蒜子（busuanzi）「本站总访问量」site_pv，随每次访问实时累加。
    显示值 = BASE + 真实总访问量。BASE=65 是为让部署后第一位访客正好看到 67
    （探测接口时该域名已占用 1 次，故首位访客的统计值为 2 → 65+2=67），此后每来一个人 +1。
-   BASE 改为 0 即显示纯真实值。仅 http(s) 加载（不蒜子需联网，file:// 下不加载），
-   取不到数据时保留初始的 67。 */
+   BASE 改为 0 即显示纯真实值。数字位初始留空（占固定宽度防跳动），接口返回后填入；
+   4 秒内未返回才兜底显示 67，避免「先闪 67 再变真值」。仅 http(s) 加载。 */
 (function(){
   const BASE = 65;
+  const FALLBACK = 67;
   const el = document.getElementById("visit-count");
-  if (location.protocol !== "http:" && location.protocol !== "https:") return;
+  if (location.protocol !== "http:" && location.protocol !== "https:") {
+    el.textContent = FALLBACK;
+    return;
+  }
+  let done = false;
   window.busuanziCallback = function(data){
     const pv = Number(data && data.site_pv);
-    if (isFinite(pv)) el.textContent = BASE + pv;
+    if (isFinite(pv)) { done = true; el.textContent = BASE + pv; }
   };
+  setTimeout(function(){ if (!done) el.textContent = FALLBACK; }, 4000);
   const s = document.createElement("script");
   s.src = "https://busuanzi.ibruce.info/busuanzi?jsonpCallback=busuanziCallback";
   s.referrerPolicy = "no-referrer-when-downgrade";
