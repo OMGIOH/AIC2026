@@ -486,7 +486,7 @@ function showNodeDetail(id){
     ${n.source==="external_placeholder"?`<span class="d-badge">外部占位节点</span>`:`<span class="d-badge">S1 白名单</span>`}
     <span class="d-badge">度 ${n.deg}</span>
     </div>
-    ${n.image_source ? '<div class="d-note" style="margin-top:8px;">图片来源：' + esc(n.image_source) + '</div>' : ''}    <div class="ep-grid">
+    <div class="ep-grid">
   </div>`;
   if(n.note) html+=`<div class="d-note">${esc(n.note)}</div>`;
   if(n.image_source) html+=`<div class="d-sec">图片来源</div><div class="d-note">${esc(n.image_source)}</div>`;
@@ -671,7 +671,6 @@ const mediaSlot=(type,label)=>{
       ${n.source==="external_placeholder"?`<span class="d-badge">外部占位节点</span>`:`<span class="d-badge">S1 白名单</span>`}
       <span class="d-badge">度 ${n.deg}</span>
     </div>
-      ${n.image_source?`<div class="d-note" style="margin-top:8px;">图片来源：${esc(n.image_source)}</div>`:""}
     <div class="ep-grid">
       <div class="ep-col">${firstseen}${aliases}${forms}${attrHtml}</div>
       <div class="ep-col">${notes}${evHtml}${incHtml}</div>
