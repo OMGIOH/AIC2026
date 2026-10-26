@@ -1,0 +1,58 @@
+{
+ "date": "2026-09-30",
+ "checks": [
+  {
+   "id": "C1",
+   "name": "关系-类型合法矩阵",
+   "pass": true,
+   "detail": "47/47 类型合法；亲属朝向 全一致",
+   "bad": []
+  },
+  {
+   "id": "C2",
+   "name": "precedes/节拍链",
+   "pass": true,
+   "detail": "14 主事件 beat 覆盖 True（断链即漏）"
+  },
+  {
+   "id": "C3",
+   "name": "证据指针完备（事实边）",
+   "pass": true,
+   "bad": [],
+   "detail": "0 条事实边缺证据"
+  },
+  {
+   "id": "C4",
+   "name": "证据指针回放",
+   "pass": true,
+   "detail": "197/197",
+   "bad": []
+  },
+  {
+   "id": "C5",
+   "name": "garbled 句泄漏",
+   "pass": true,
+   "detail": "无"
+  },
+  {
+   "id": "C6",
+   "name": "平行对照段引文落区间",
+   "pass": true,
+   "detail": "14/14 ✓",
+   "bad": []
+  },
+  {
+   "id": "C7",
+   "name": "设计约束包",
+   "pass": true,
+   "detail": "降灾双边=True 动物边=True sameAs×3=True 斗法不坏=True 敏感注记=True"
+  },
+  {
+   "id": "C8",
+   "name": "p914 归属 beat3（边界句规则）",
+   "pass": true,
+   "detail": "事件3页码含 p914 起，符合 S1 裁定"
+  }
+ ],
+ "passed": "8/8"
+}
