@@ -18,8 +18,6 @@
   .badge-demo{background:var(--accent); color:#fff; font-size:11px; padding:2px 8px; border-radius:10px; white-space:nowrap;}
   .stats{display:flex; gap:8px; flex-wrap:wrap;}
   .stats span{background:#4a423c; border-radius:4px; padding:3px 9px; font-size:12px; color:#e8e0d0;}
-  .hits{padding-left:14px; border-left:1px solid #5a5049; font-size:12px; color:#b3a794; white-space:nowrap;}
-  .hits b{color:#f5f1e8; font-weight:600; font-variant-numeric:tabular-nums; display:inline-block; min-width:2.2em; text-align:right;}
   #search{margin-left:auto; background:#4a423c; border:1px solid #6b5f55; color:#f5f1e8; border-radius:6px;
           padding:5px 10px; font-size:13px; width:230px; outline:none;}
   #search::placeholder{color:#b3a794;}
@@ -144,9 +142,8 @@
 <body>
 <header>
   <h1>《安王与祖王》人物知识图谱</h1>
-  <span class="badge-demo">初步 DEMO · S0–S2 数据预览</span>
+  <span class="badge-demo">多模态知识图谱系统</span>
   <div class="stats" id="stats"></div>
-  <span class="hits" id="hits">访问量 <b id="visit-count"></b></span>
   <input id="search" placeholder="搜索实体：安王 / 祖王 / 鱼女 …" autocomplete="off">
 </header>
 <div id="app">
@@ -488,8 +485,11 @@ function showNodeDetail(id){
     ${n.kind?`<span class="d-badge">${esc(n.kind)}</span>`:""}
     ${n.source==="external_placeholder"?`<span class="d-badge">外部占位节点</span>`:`<span class="d-badge">S1 白名单</span>`}
     <span class="d-badge">度 ${n.deg}</span>
+    </div>
+    ${n.image_source ? '<div class="d-note" style="margin-top:8px;">图片来源：' + esc(n.image_source) + '</div>' : ''}    <div class="ep-grid">
   </div>`;
   if(n.note) html+=`<div class="d-note">${esc(n.note)}</div>`;
+  if(n.image_source) html+=`<div class="d-sec">图片来源</div><div class="d-note">${esc(n.image_source)}</div>`;
   if(n.first_seen) html+= n.first_seen.page
     ? `<div class="d-sec">首见</div><div class="quote"><span class="qp">p${n.first_seen.page}·L${n.first_seen.line_no}　</span><span class="qt">「${esc(n.first_seen.text)}」</span></div>`
     : `<div class="d-sec">首见（外部来源登记）</div><div class="d-note">${esc(n.first_seen.source)}</div>`;
@@ -663,13 +663,15 @@ const mediaSlot=(type,label)=>{
   ve.innerHTML=`<div class="ep-wrap">
     <div class="ep-top"><button class="back-btn" id="ep-back">← 返回图谱</button><span class="ep-badge">实体页 · ${m.label||n.type}</span></div>
     ${hasMedia?`<div class="media-row ep-media" id="ep-media"></div>`:""}
+    <div style="margin-top:8px; font-size:12px; color:#57534e;">图片来源：${n.image_source || "无"}</div>
     <div class="ep-name">${esc(n.name)}</div>
-    <div class="d-badges">
+        <div class="d-badges">
       <span class="d-badge" style="color:${m.color};border-color:${m.color}">${m.label||n.type}</span>
       ${n.kind?`<span class="d-badge">${esc(n.kind)}</span>`:""}
       ${n.source==="external_placeholder"?`<span class="d-badge">外部占位节点</span>`:`<span class="d-badge">S1 白名单</span>`}
       <span class="d-badge">度 ${n.deg}</span>
     </div>
+      ${n.image_source?`<div class="d-note" style="margin-top:8px;">图片来源：${esc(n.image_source)}</div>`:""}
     <div class="ep-grid">
       <div class="ep-col">${firstseen}${aliases}${forms}${attrHtml}</div>
       <div class="ep-col">${notes}${evHtml}${incHtml}</div>
@@ -831,32 +833,6 @@ window.addEventListener("resize",resize);
 resize();
 refreshVisibility();
 requestAnimationFrame(tick);
-</script>
-<script>
-/* 访问量：不蒜子（busuanzi）「本站总访问量」site_pv，随每次访问实时累加。
-   显示值 = BASE + 真实总访问量。BASE=65 是为让部署后第一位访客正好看到 67
-   （探测接口时该域名已占用 1 次，故首位访客的统计值为 2 → 65+2=67），此后每来一个人 +1。
-   BASE 改为 0 即显示纯真实值。数字位初始留空（占固定宽度防跳动），接口返回后填入；
-   4 秒内未返回才兜底显示 67，避免「先闪 67 再变真值」。仅 http(s) 加载。 */
-(function(){
-  const BASE = 65;
-  const FALLBACK = 67;
-  const el = document.getElementById("visit-count");
-  if (location.protocol !== "http:" && location.protocol !== "https:") {
-    el.textContent = FALLBACK;
-    return;
-  }
-  let done = false;
-  window.busuanziCallback = function(data){
-    const pv = Number(data && data.site_pv);
-    if (isFinite(pv)) { done = true; el.textContent = BASE + pv; }
-  };
-  setTimeout(function(){ if (!done) el.textContent = FALLBACK; }, 4000);
-  const s = document.createElement("script");
-  s.src = "https://busuanzi.ibruce.info/busuanzi?jsonpCallback=busuanziCallback";
-  s.referrerPolicy = "no-referrer-when-downgrade";
-  document.head.appendChild(s);
-})();
 </script>
 </body>
 </html>
