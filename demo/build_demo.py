@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parent.parent
 S1 = ROOT / "实验流程" / "S1_人物表与译名考订"
 S2 = ROOT / "实验流程" / "S2_三轮抽取"
 DEMO = Path(__file__).resolve().parent
+IMAGE_SOURCES = S1 / "image_sources.json"
 
 # 外部版本件规范名（与 S0 bibliography.json / S2 边 note 术语一致）
 EXTERNAL_LABELS = {
@@ -47,6 +48,10 @@ def trim_first_seen(fs):
 
 
 def main():
+    image_sources = {}
+    if IMAGE_SOURCES.exists():
+        image_sources = json.loads(IMAGE_SOURCES.read_text(encoding="utf-8"))
+
     entities = load_jsonl(S1 / "entities.jsonl")
     triples  = load_jsonl(S2 / "triples.jsonl")
     events   = load_jsonl(S2 / "events.jsonl")
@@ -74,6 +79,7 @@ def main():
             "aliases": e.get("aliases") or None,
             "ref_forms": e.get("ref_forms") or None,
             "notes": e.get("notes") or None,
+            "image_source": image_sources.get(e["id"]),
         })
     for ext in dangling:
         if ext not in EXTERNAL_LABELS:
@@ -85,6 +91,7 @@ def main():
             "source": "external_placeholder", "in_graph": True,
             "first_seen": None, "aliases": None, "ref_forms": None,
             "notes": ["demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"],
+            "image_source": None,
         })
 
     edges = [{
@@ -127,6 +134,7 @@ def main():
                 "nodes": len(nodes), "edges": len(edges), "events": len(events),
                 "attributes": len(attributes), "whitelist": len(entities),
                 "external": ext_count, "in_graph_whitelist": len(refs & whitelist_ids),
+                "image_source_covered": sum(1 for n in nodes if n.get("image_source")),
             },
             "sources": [
                 "实验流程/S1_人物表与译名考订/entities.jsonl",
@@ -134,9 +142,7 @@ def main():
                 "实验流程/S2_三轮抽取/events.jsonl",
                 "实验流程/S2_三轮抽取/attributes.jsonl",
             ],
-            "footer": "初步 Demo（非 S4 正式产出）：数据取自 S0–S2 产出；证据指针仅指向《布依族古歌》本（canon v1.0-ocr），"
-                      "外部资料仅作版本链/sameAs；外部版本件为占位节点；边 verified 状态由 S3 回验后更新。"
-                      "重新生成：python3 demo/build_demo.py",
+            "footer": "数据基于《布依族古歌》（canon v1.0-ocr）构建；证据指针严格指向古籍原文与考证资料。系统通过 DeepSeek V4.1 与 ZCode Agent 完成知识抽取与编排，结合 GPT-6.1 与即梦/豆包等 AIGC 工具实现多模态视觉复原，并遵循 GB/T 7714 参考文献标准进行学术溯源。",
         },
         "nodes": nodes, "edges": edges, "events": evs, "attributes": attributes,
     }
