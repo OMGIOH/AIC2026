@@ -1,9 +1,9 @@
-name: Deploy demo to GitHub Pages
+name: Deploy knowledge graph site to GitHub Pages
 
 on:
   push:
     branches: [main]
-    paths: ['demo/**', '.github/workflows/deploy-demo.yml']
+    paths: ['kg-visualization/**', '.github/workflows/deploy.yml']
   workflow_dispatch:
 
 permissions:
@@ -26,6 +26,6 @@ jobs:
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: demo
+          path: kg-visualization
       - id: deployment
         uses: actions/deploy-pages@v4

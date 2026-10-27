@@ -1,7 +1,7 @@
 {
  "meta": {
-  "title": "《安王与祖王》人物知识图谱 · 初步 Demo",
-  "generated": "2026-10-26",
+  "title": "《安王与祖王》多模态知识图谱",
+  "generated": "2026-10-27",
   "canon_version": "v1.0-ocr（古歌本 p904–985）",
   "counts": {
    "nodes": 50,
@@ -1114,7 +1114,7 @@
    "aliases": null,
    "ref_forms": null,
    "notes": [
-    "demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"
+    "仅由 S2 版本层/cross_doc 边引用的外部版本件；条目信息取自 S0 书目登记"
    ],
    "image_source": null
   },
@@ -1129,7 +1129,7 @@
    "aliases": null,
    "ref_forms": null,
    "notes": [
-    "demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"
+    "仅由 S2 版本层/cross_doc 边引用的外部版本件；条目信息取自 S0 书目登记"
    ],
    "image_source": null
   },
@@ -1144,7 +1144,7 @@
    "aliases": null,
    "ref_forms": null,
    "notes": [
-    "demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"
+    "仅由 S2 版本层/cross_doc 边引用的外部版本件；条目信息取自 S0 书目登记"
    ],
    "image_source": null
   },
@@ -1159,7 +1159,7 @@
    "aliases": null,
    "ref_forms": null,
    "notes": [
-    "demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"
+    "仅由 S2 版本层/cross_doc 边引用的外部版本件；条目信息取自 S0 书目登记"
    ],
    "image_source": null
   },
@@ -1174,7 +1174,7 @@
    "aliases": null,
    "ref_forms": null,
    "notes": [
-    "demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"
+    "仅由 S2 版本层/cross_doc 边引用的外部版本件；条目信息取自 S0 书目登记"
    ],
    "image_source": null
   },
@@ -1189,7 +1189,7 @@
    "aliases": null,
    "ref_forms": null,
    "notes": [
-    "demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"
+    "仅由 S2 版本层/cross_doc 边引用的外部版本件；条目信息取自 S0 书目登记"
    ],
    "image_source": null
   },
@@ -1204,7 +1204,7 @@
    "aliases": null,
    "ref_forms": null,
    "notes": [
-    "demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"
+    "仅由 S2 版本层/cross_doc 边引用的外部版本件；条目信息取自 S0 书目登记"
    ],
    "image_source": null
   },
@@ -1219,7 +1219,7 @@
    "aliases": null,
    "ref_forms": null,
    "notes": [
-    "demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"
+    "仅由 S2 版本层/cross_doc 边引用的外部版本件；条目信息取自 S0 书目登记"
    ],
    "image_source": null
   },
@@ -1234,7 +1234,7 @@
    "aliases": null,
    "ref_forms": null,
    "notes": [
-    "demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"
+    "仅由 S2 版本层/cross_doc 边引用的外部版本件；条目信息取自 S0 书目登记"
    ],
    "image_source": null
   },
@@ -1249,7 +1249,7 @@
    "aliases": null,
    "ref_forms": null,
    "notes": [
-    "demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"
+    "仅由 S2 版本层/cross_doc 边引用的外部版本件；条目信息取自 S0 书目登记"
    ],
    "image_source": null
   },
@@ -1264,7 +1264,7 @@
    "aliases": null,
    "ref_forms": null,
    "notes": [
-    "demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"
+    "仅由 S2 版本层/cross_doc 边引用的外部版本件；条目信息取自 S0 书目登记"
    ],
    "image_source": null
   }

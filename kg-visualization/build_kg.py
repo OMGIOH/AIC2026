@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""初步 demo 知识图谱构建：合并 S1 实体表 + S2 三轮抽取 → graph.json + 自包含 index.html。
+"""多模态知识图谱站点构建：合并 S1 实体表 + S2 三轮抽取 → graph.json + 自包含 index.html。
 
-- 节点 = S1 白名单中被 S2 引用的实体 + S2 版本层/cross_doc 边引用的外部版本件（占位节点）。
+- 节点 = S1 白名单中被 S2 引用的实体 + S2 版本层/cross_doc 边引用的外部版本件。
 - 边 = S2 triples.jsonl 全部 47 条（fact/version/cross_doc 三层）。
 - 事件 = S2 events.jsonl 14 主节拍 + 3 斗法子事件；属性 = attributes.jsonl。
 - 幂等可复跑；HTML 由 template.html 注入数据生成，无外部网络依赖。
 
-用法：python3 demo/build_demo.py
+用法：python3 kg-visualization/build_kg.py
 """
 import json
 from datetime import date
@@ -15,7 +15,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 S1 = ROOT / "实验流程" / "S1_人物表与译名考订"
 S2 = ROOT / "实验流程" / "S2_三轮抽取"
-DEMO = Path(__file__).resolve().parent
+SITE = Path(__file__).resolve().parent
 IMAGE_SOURCES = S1 / "image_sources.json"
 
 # 外部版本件规范名（与 S0 bibliography.json / S2 边 note 术语一致）
@@ -37,7 +37,7 @@ def load_jsonl(path):
     return [json.loads(l) for l in path.read_text(encoding="utf-8").splitlines() if l.strip()]
 
 def trim_ptr(p):
-    """证据指针瘦身：demo 只保留页/行/引文。"""
+    """证据指针瘦身：只保留页/行/引文。"""
     return {k: p[k] for k in ("page", "line_no", "quote", "line_text") if k in p}
 
 def trim_first_seen(fs):
@@ -90,7 +90,7 @@ def main():
             "id": ext, "name": name, "type": typ, "kind": "外部版本件",
             "source": "external_placeholder", "in_graph": True,
             "first_seen": None, "aliases": None, "ref_forms": None,
-            "notes": ["demo 占位节点：仅由 S2 版本层/cross_doc 边引用，未入 S1 白名单；正式登记在 S4 落库处理"],
+            "notes": ["仅由 S2 版本层/cross_doc 边引用的外部版本件；条目信息取自 S0 书目登记"],
             "image_source": None,
         })
 
@@ -127,7 +127,7 @@ def main():
 
     data = {
         "meta": {
-            "title": "《安王与祖王》人物知识图谱 · 初步 Demo",
+            "title": "《安王与祖王》多模态知识图谱",
             "generated": str(date.today()),
             "canon_version": "v1.0-ocr（古歌本 p904–985）",
             "counts": {
@@ -147,18 +147,18 @@ def main():
         "nodes": nodes, "edges": edges, "events": evs, "attributes": attributes,
     }
 
-    (DEMO / "graph.json").write_text(
+    (SITE / "graph.json").write_text(
         json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
-    template = (DEMO / "template.html").read_text(encoding="utf-8")
+    template = (SITE / "template.html").read_text(encoding="utf-8")
     payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     if "__GRAPH_DATA__" not in template:
         raise SystemExit("template.html 缺少 __GRAPH_DATA__ 注入点")
-    (DEMO / "index.html").write_text(template.replace("__GRAPH_DATA__", payload), encoding="utf-8")
+    (SITE / "index.html").write_text(template.replace("__GRAPH_DATA__", payload), encoding="utf-8")
 
     c = data["meta"]["counts"]
-    print(f"demo 生成完毕：节点 {c['nodes']}（白名单 {c['in_graph_whitelist']} 入图 + 外部占位 {c['external']}，"
+    print(f"站点生成完毕：节点 {c['nodes']}（白名单 {c['in_graph_whitelist']} 入图 + 外部版本件 {c['external']}，"
           f"未入边 {c['whitelist'] - c['in_graph_whitelist']}）· 边 {c['edges']} · 事件 {c['events']} · 属性 {c['attributes']}")
-    print(f"输出：demo/graph.json, demo/index.html")
+    print(f"输出：kg-visualization/graph.json, kg-visualization/index.html")
 
 if __name__ == "__main__":
     main()
